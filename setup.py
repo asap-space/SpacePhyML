@@ -10,6 +10,8 @@ setup(
     license='MIT License',
     packages=['spacephyml'],
     install_requires=['torch',
+                      'pandas',
+                      'cdflib',
                       ],
 
     classifiers=[
