@@ -14,7 +14,7 @@ _LABELS_URL_BASE = 'https://bitbucket.org/volshevsky/mmslearning/' + \
                    'raw/7b93d08b585842454c309668870ecd25ea16e3e0/labels_human/'
 _LABELS_FILENAME_BASE = 'labels_fpi_fast_dis_dist_'
 
-def download_label_file(outputpath, filedate):
+def _download_label_file(outputpath, filedate):
     """
     Download Olshevsky label files.
     """
@@ -23,7 +23,12 @@ def download_label_file(outputpath, filedate):
     download_file_with_status(_LABELS_URL_BASE + file, outputpath + file)
     return outputpath + file
 
-def get_olshevsky_label_list(trange = None):
+_OLSHEVSKY_REF = """Olshevsky, V., et al. (2021). Automated classification of plasma
+regions using 3D particle energy distributions. Journal of Geophysical Research:
+Space Physics, https://doi.org/10.1029/2021JA029620
+"""
+
+def _get_olshevsky_label_list(trange = None):
     """
     Get a pandoc DataFrame containing all the Olshevsky labels from within the given
     time range.
@@ -32,7 +37,7 @@ def get_olshevsky_label_list(trange = None):
         trange = [datetime(2017,11,1),datetime(2017,12,31)]
     #Download the labelfiles from Olshevsky
     print('Downloading Olshevsky label files.')
-    label_files = [download_label_file(tempfile.gettempdir() + \
+    label_files = [_download_label_file(tempfile.gettempdir() + \
                     '/mms_labels/', d) for d in ['201711', '201712']]
 
     data = {'label':[],'epoch':[],'file':[], 'date':[]}
@@ -66,20 +71,21 @@ def get_olshevsky_label_list(trange = None):
 
     return data.reset_index(drop=True).drop(columns=['date'])
 
-def get_dataset(label_source = 'Olshevsky', trange = None,
-                       sampled = True, samples_per_label = 5000, clean = False):
+def get_dataset(label_source, trange, sampled = True,
+                samples_per_label = 5000, clean = False):
     """
     Get a dataset based on a given config.
     """
 
-    if trange is None:
-        trange = ['2017-11-01', '2017-12-31']
-
     trange = [datetime.strptime(d,'%Y-%m-%d') for d in trange]
 
     if label_source == 'Olshevsky':
-        labels = get_olshevsky_label_list(trange)
+        print('Generating dataset based on labels from Olshevsky et. al. (2021)')
+        print(f'\t{_OLSHEVSKY_REF}')
+        labels = _get_olshevsky_label_list(trange)
         labels['var_name'] = 'mms1_dis_dist_fast'
+    else:
+        raise ValueError(f'Incorrect label_source ({label_source})')
 
     print('Creating dataset based on labels')
     if clean:
@@ -96,7 +102,8 @@ def get_dataset(label_source = 'Olshevsky', trange = None,
 
     return labels
 
-def create_dataset(dataset_path, trange, force = False, sampled = True, clean = True):
+def create_dataset(dataset_path, label_source, trange,
+                   force = False, sampled = True, clean = True):
     """
     Create a dataset file based on given config.
     """
@@ -111,6 +118,6 @@ def create_dataset(dataset_path, trange, force = False, sampled = True, clean = 
             print("Dataset exists, aborting")
             return
 
-    labels = get_dataset(trange=trange, sampled=sampled, clean=clean)
+    labels = get_dataset(label_source, trange=trange, sampled=sampled, clean=clean)
 
     labels.to_csv(dataset_path)

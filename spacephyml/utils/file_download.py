@@ -3,7 +3,7 @@ Utils for file downloads.
 """
 
 import functools
-from os import path, unlink
+from os import path
 from shutil import copyfileobj, copy
 from tempfile import NamedTemporaryFile
 from tqdm.auto import tqdm
@@ -53,7 +53,6 @@ def download_file_with_status(url_file, filepath, session = None):
         # future downloads.
         copy(ftmp.name, filepath)
         r.close()
-        unlink(ftmp.name)  # delete the temporary file
 
     if close_session:
         session.close()

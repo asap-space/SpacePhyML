@@ -9,9 +9,10 @@ nav:
   - Home: index.md
   - Quick Start: quick_start.md
   - User Guide:
-    - Overview: overview.md
-    - Datasets: datasets.md
-  - About: about.md
+    - Overview: user_guide/overview.md
+    - Datasets: user_guide/datasets.md
+    - Dataset Creator : user_guide/dataset_creator.md
+    - Examples : user_guide/examples.md
 
 theme:
   name: mkdocs
@@ -29,3 +30,5 @@ plugins:
             members_order: source
             show_source: false
             show_signature_annotations: true
+            show_root_heading: true
+            heading_level: 3

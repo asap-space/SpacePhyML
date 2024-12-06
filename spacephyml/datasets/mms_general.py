@@ -15,6 +15,20 @@ class MMSDataset(Dataset):
     """
     Loading a dataset with labeled MMS data based on dataset file.
 
+    By default SpacePhyML will look for MMS data at the PySPEDAS data location
+    ([PySPEDAS](https://pyspedas.readthedocs.io/en/stable/getting_started.html#local-data-directories).)
+    If the PySPEDAS environmental variable's are not set data will be placed at
+    `$HOME/spacephyml_data/mms`, following the same directory structure as
+    PySPEDAS (and the [MMS Science Data Center](https://lasp.colorado.edu/mms/sdc/public/)).
+    Data files that are missing when the class is initialised will be downloaded.
+
+    The dataset file have to have the following columns:
+
+    - file : Specifying the corresponding MMS CDF file to read data from.
+    - var_name : The variable in the CDF file to read.
+    - epoch : The CDF epoch of the sample.
+    - label : The label corresponding to the sample
+
     Examples:
         >>> from spacephyml.datasets import MMSDataset
         >>> dataset = MMSDataset('./mydataset.csv')
@@ -24,6 +38,9 @@ class MMSDataset(Dataset):
         rootdir (string): The override the default rootdir to for the MMS data storage.
         transform (callable): Optional transform to be applied on each sample.
         cache (bool): If data should be cached.
+
+    Returns:
+        Will return a tuple with (x, y, epoch, file) when called as an iterator or used in a DataLoader.
     """
 
     def __init__(self, dataset_path, rootdir = None, transform = None, cache = True):
