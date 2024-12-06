@@ -1,8 +1,8 @@
 """
 Dataset utils specific to MMS.
 """
+from os import path, makedirs
 import requests
-from os import path, makedirs, unlink
 
 from .file_download import download_file_with_status
 
@@ -40,7 +40,7 @@ def filename_to_filepath(filename):
 _MMS_DATA_BASE_URL = 'https://lasp.colorado.edu/mms/sdc/public/files/api/v1/'
 
 def get_file_list(start_date,end_date,data_rate = 'fast', datalevel = 'l2',
-                  datatype = 'dis-dist', session=None):
+                  datatype = 'dis-dist'):
     """
     Get a list of files from the MMS Science Data center
     """
@@ -48,17 +48,10 @@ def get_file_list(start_date,end_date,data_rate = 'fast', datalevel = 'l2',
     url += f'start_date={start_date}&end_date={end_date}&sc_id=mms1&instrument_id=fpi'
     url += f'&data_rate_mode={data_rate}&data_level={datalevel}&descriptor={datatype}'
 
-    close_session = False
-    if session == None:
-        close_session = True
-        session = requests.Session()
-
-    r = session.get(url)
-    files = r.json()['files']
-    r.close()
-
-    if close_session:
-        session.close()
+    with requests.Session() as session:
+        r = session.get(url)
+        files = r.json()['files']
+        r.close()
 
     return files
 
@@ -67,7 +60,7 @@ def download_cdf_files(rootdir, cdf_filepaths, session = None):
     Download CDF files from the MMS Science Data Center based on a filelist.
     """
     close_session = False
-    if session == None:
+    if session is None:
         close_session = True
         session = requests.Session()
 

@@ -1,25 +1,36 @@
-import sys
-from os import path, listdir, makedirs, remove
-import pprint
-import pandas as pd
-import itertools
+"""
+Script for creating dataset based on exisiting labels.
+"""
+import tempfile
+from os import path, makedirs, remove
 from argparse import ArgumentParser
 from datetime import datetime
 
-from utils import read_cdf_file
-from utils.file_download import missing_files, download_file_with_status
-import tempfile
+import pandas as pd
 
-_LABELS_URL_BASE = 'https://bitbucket.org/volshevsky/mmslearning/raw/7b93d08b585842454c309668870ecd25ea16e3e0/labels_human/'
+from .utils import read_cdf_file
+from .utils.file_download import download_file_with_status
+
+_LABELS_URL_BASE = 'https://bitbucket.org/volshevsky/mmslearning/' + \
+                   'raw/7b93d08b585842454c309668870ecd25ea16e3e0/labels_human/'
 _LABELS_FILENAME_BASE = 'labels_fpi_fast_dis_dist_'
 
 def download_label_file(outputpath, filedate):
+    """
+    Download Olshevsky label files.
+    """
     makedirs(outputpath, exist_ok=True)
     file = _LABELS_FILENAME_BASE + filedate + '.cdf'
     download_file_with_status(_LABELS_URL_BASE + file, outputpath + file)
     return outputpath + file
 
-def get_olshevsky_label_list(trange = [datetime(2017,11,1),datetime(2017,12,31)]):
+def get_olshevsky_label_list(trange = None):
+    """
+    Get a pandoc DataFrame containing all the Olshevsky labels from within the given
+    time range.
+    """
+    if trange is None:
+        trange = [datetime(2017,11,1),datetime(2017,12,31)]
     #Download the labelfiles from Olshevsky
     print('Downloading Olshevsky label files.')
     label_files = [download_label_file(tempfile.gettempdir() + \
@@ -56,7 +67,14 @@ def get_olshevsky_label_list(trange = [datetime(2017,11,1),datetime(2017,12,31)]
 
     return data.reset_index(drop=True).drop(columns=['date'])
 
-def get_even_data_dist(label_source = 'Olshevsky', trange = ['2017-11-01', '2017-12-31'], sampled = True, samples_per_label = 5000, clean = False):
+def get_dataset(label_source = 'Olshevsky', trange = None,
+                       sampled = True, samples_per_label = 5000, clean = False):
+    """
+    Get a dataset based on a given config.
+    """
+
+    if trange is None:
+        trange = ['2017-11-01', '2017-12-31']
 
     trange = [datetime.strptime(d,'%Y-%m-%d') for d in trange]
 
@@ -79,25 +97,33 @@ def get_even_data_dist(label_source = 'Olshevsky', trange = ['2017-11-01', '2017
 
     return labels
 
-def create_dataset(dataset_path, trange, sampled = True, clean = True):
-    dirpath, filename = path.split(path.abspath(dataset_path))
+def create_dataset(dataset_path, trange, force = False, sampled = True, clean = True):
+    """
+    Create a dataset file based on given config.
+    """
+
+    dirpath, _ = path.split(path.abspath(dataset_path))
     makedirs(dirpath, exist_ok=True)
 
     if path.isfile(dataset_path):
-        if args.force:
+        if force:
             remove(dataset_path)
         else:
             print("Dataset exists, aborting")
             return
 
-    labels = get_even_data_dist(trange=trange, sampled=sampled, clean=clean)
+    labels = get_dataset(trange=trange, sampled=sampled, clean=clean)
 
     labels.to_csv(dataset_path)
 
 def pars_args():
+    """
+    Parse commandline arguments.
+    """
     parser = ArgumentParser()
 
-    parser.add_argument('--config', default=None, choices=['orbit', 'orbitclean', 'nov', 'nov_full','dec'])
+    parser.add_argument('--config', default=None,
+                        choices=['orbit', 'orbitclean', 'nov', 'nov_full','dec'])
     parser.add_argument('--start', default='2017-11-01')
     parser.add_argument('--end', default='2017-11-31')
     parser.add_argument('--force', action='store_true', default=False)
@@ -114,40 +140,40 @@ def pars_args():
     return args
 
 if __name__ == "__main__":
-    args = pars_args()
+    ARGS = pars_args()
 
     labels_dl_dir = tempfile.gettempdir() + '/mms_labels/'
 
-    year = 2017
-    sampled = False
-    clean = False
-    if args.trange == 'orbit':
-        month = 12
-        trange=['2017-12-03','2017-12-07']
-        sampled = False
-    elif args.trange == 'orbitclean':
-        month = 12
-        trange=['2017-12-03','2017-12-07']
-        clean = True
-        sampled = False
-    elif args.trange == 'dec':
-        clean = True
-        sampled = True
-        month = 12
-        trange=['2017-12-01','2017-12-31']
-    elif args.trange == 'nov_full':
-        clean = False
-        sampled = False
-        month = 11
-        trange=['2017-11-01','2017-11-30']
+    YEAR = 2017
+    SAMPLED = False
+    CLEAN = False
+    if ARGS.trange == 'orbit':
+        MONTH = 12
+        TRANGE=['2017-12-03','2017-12-07']
+        SAMPLED = False
+    elif ARGS.trange == 'orbitclean':
+        MONTH = 12
+        TRANGE=['2017-12-03','2017-12-07']
+        CLEAN = True
+        SAMPLED = False
+    elif ARGS.trange == 'dec':
+        CLEAN = True
+        SAMPLED = True
+        MONTH = 12
+        TRANGE=['2017-12-01','2017-12-31']
+    elif ARGS.trange == 'nov_full':
+        CLEAN = False
+        SAMPLED = False
+        MONTH = 11
+        TRANGE=['2017-11-01','2017-11-30']
     else:
-        clean = True
-        sampled = True
-        month = 11
-        trange=['2017-11-01','2017-11-30']
+        CLEAN = True
+        SAMPLED = True
+        MONTH = 11
+        TRANGE=['2017-11-01','2017-11-30']
 
-    if args.output == None:
-        args.output = f'./dataset_{args.trange}_{year}_{month}'
-        args.output += '_clean.csv' if clean else '.csv'
+    if ARGS.output is None:
+        ARGS.output = f'./dataset_{ARGS.trange}_{YEAR}_{MONTH}'
+        ARGS.output += '_clean.csv' if CLEAN else '.csv'
 
-    create_dataset(args.output, trange, sampled, clean)
+    create_dataset(ARGS.output, TRANGE, SAMPLED, CLEAN)

@@ -11,6 +11,7 @@ setup(
     packages=['spacephyml'],
     install_requires=['torch',
                       'pandas',
+                      'requests',
                       'cdflib',
                       ],
 

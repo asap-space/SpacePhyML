@@ -1,4 +1,7 @@
-import torch
+"""
+Module containing different datasets.
+"""
+
 from torch.utils.data import Dataset
 
 import pandas as pd
@@ -11,18 +14,20 @@ from .__init__ import _MMS_DATA_DIR
 class MMSDataset(Dataset):
     """
     Loading a dataset with labeled MMS data based on dataset file.
+
+    Examples:
+        >>> from spacephyml.dataset import MMSDataset
+        >>> dataset = MMSDataset('./mydataset.csv')
+
     """
 
-    def __init__(self, dataset_path, rootdir = None, transform=None, cache = True):
+    def __init__(self, dataset_path, rootdir = None, transform = None, cache = True):
         """
-
-        Arguments:
+        Args:
             dataset_path (string): Path to the csv file containing the dataset.
-            rootdird (string): The rootdir to for where the MMS data is stored.
-            transform (callable, optional): Optional transform to be applied on each sample.
+            rootdir (string): The rootdir to for where the MMS data is stored.
+            transform (callable): Optional transform to be applied on each sample.
             cache (bool): If data should be cached.
-
-
         """
 
         self.dataset = pd.read_csv(dataset_path)
@@ -61,7 +66,7 @@ class MMSDataset(Dataset):
 
         data = {}
         if self.cache:
-            if not data_loc.file in self.data.keys():
+            if not data_loc.file in self.data:
                 tmp = read_cdf_file(cdf_filepath, [('var',data_loc.var_name), ('epoch','epoch')])
                 file_epochs = self.dataset.loc[self.dataset['file']==data_loc.file,
                                                 'epoch'].to_numpy()

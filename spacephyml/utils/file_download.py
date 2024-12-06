@@ -1,11 +1,18 @@
-import requests
+"""
+Utils for file downloads.
+"""
+
 import functools
 from os import path, unlink
 from shutil import copyfileobj, copy
 from tempfile import NamedTemporaryFile
 from tqdm.auto import tqdm
+import requests
 
 def missing_files(files,filepath=''):
+    """
+    Check for missing files.
+    """
     missing = []
     for filename in files:
         if not path.isfile(path.abspath(f'{filepath}{filename}')):
@@ -17,8 +24,11 @@ def missing_files(files,filepath=''):
     return missing
 
 def download_file_with_status(url_file, filepath, session = None):
+    """
+    Download files with a progress bar.
+    """
     close_session = False
-    if session == None:
+    if session is None:
         close_session = True
         session = requests.Session()
 
@@ -33,18 +43,17 @@ def download_file_with_status(url_file, filepath, session = None):
 
     desc = "(Unknown total file size)" if file_size == 0 else ""
     r.raw.read = functools.partial(r.raw.read, decode_content=True)  # Decompress if needed
-    ftmp = NamedTemporaryFile(delete=False)
-    with tqdm.wrapattr(r.raw, "read", total=file_size, desc=desc) as r_raw:
-        with open(ftmp.name, 'wb') as f:
-            copyfileobj(r_raw, f)
+    with NamedTemporaryFile() as ftmp:
+        with tqdm.wrapattr(r.raw, "read", total=file_size, desc=desc) as r_raw:
+            with open(ftmp.name, 'wb') as f:
+                copyfileobj(r_raw, f)
 
-    # If the download was successful, copy to data directory.
-    # This prevents a failed (or aborted) download to block
-    # future downloads.
-    copy(ftmp.name, filepath)
-    r.close()
-    ftmp.close()
-    unlink(ftmp.name)  # delete the temporary file
+        # If the download was successful, copy to data directory.
+        # This prevents a failed (or aborted) download to block
+        # future downloads.
+        copy(ftmp.name, filepath)
+        r.close()
+        unlink(ftmp.name)  # delete the temporary file
 
     if close_session:
         session.close()

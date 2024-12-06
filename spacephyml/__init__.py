@@ -21,4 +21,3 @@ if 'MMS_DATA_DIR' in environ:
     _MMS_DATA_DIR = environ['MMS_DATA_DIR']
 elif 'SPEDAS_DATA_DIR' in environ:
     _MMS_DATA_DIR = environ['SPEDAS_DATA_DIR']
-
