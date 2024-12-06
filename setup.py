@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='SpacePhyML',
@@ -8,11 +8,17 @@ setup(
     author='Jonah Ekelund',
     author_email='jonahek@kth.se',
     license='MIT License',
-    packages=['spacephyml'],
+    packages=find_packages(),
+    entry_points={
+        'console_scripts': [
+            'spacephyml=spacephyml.cli:main',  # Replace with your function
+        ],
+    },
     install_requires=['torch',
                       'pandas',
                       'requests',
                       'cdflib',
+                      'tqdm',
                       ],
 
     classifiers=[

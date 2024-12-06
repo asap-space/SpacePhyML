@@ -3,13 +3,12 @@ Script for creating dataset based on exisiting labels.
 """
 import tempfile
 from os import path, makedirs, remove
-from argparse import ArgumentParser
 from datetime import datetime
 
 import pandas as pd
 
-from .utils import read_cdf_file
-from .utils.file_download import download_file_with_status
+from ..utils import read_cdf_file
+from ..utils.file_download import download_file_with_status
 
 _LABELS_URL_BASE = 'https://bitbucket.org/volshevsky/mmslearning/' + \
                    'raw/7b93d08b585842454c309668870ecd25ea16e3e0/labels_human/'
@@ -115,65 +114,3 @@ def create_dataset(dataset_path, trange, force = False, sampled = True, clean = 
     labels = get_dataset(trange=trange, sampled=sampled, clean=clean)
 
     labels.to_csv(dataset_path)
-
-def pars_args():
-    """
-    Parse commandline arguments.
-    """
-    parser = ArgumentParser()
-
-    parser.add_argument('--config', default=None,
-                        choices=['orbit', 'orbitclean', 'nov', 'nov_full','dec'])
-    parser.add_argument('--start', default='2017-11-01')
-    parser.add_argument('--end', default='2017-11-31')
-    parser.add_argument('--force', action='store_true', default=False)
-    parser.add_argument('--clean', action='store_true', default=False)
-    parser.add_argument('--samples', default=0)
-    parser.add_argument('output', nargs='?', default=None)
-
-    args = parser.parse_args()
-
-    print("Arguments:")
-    for arg in vars(args):
-        print(f" {arg}: {getattr(args,arg)}")
-
-    return args
-
-if __name__ == "__main__":
-    ARGS = pars_args()
-
-    labels_dl_dir = tempfile.gettempdir() + '/mms_labels/'
-
-    YEAR = 2017
-    SAMPLED = False
-    CLEAN = False
-    if ARGS.trange == 'orbit':
-        MONTH = 12
-        TRANGE=['2017-12-03','2017-12-07']
-        SAMPLED = False
-    elif ARGS.trange == 'orbitclean':
-        MONTH = 12
-        TRANGE=['2017-12-03','2017-12-07']
-        CLEAN = True
-        SAMPLED = False
-    elif ARGS.trange == 'dec':
-        CLEAN = True
-        SAMPLED = True
-        MONTH = 12
-        TRANGE=['2017-12-01','2017-12-31']
-    elif ARGS.trange == 'nov_full':
-        CLEAN = False
-        SAMPLED = False
-        MONTH = 11
-        TRANGE=['2017-11-01','2017-11-30']
-    else:
-        CLEAN = True
-        SAMPLED = True
-        MONTH = 11
-        TRANGE=['2017-11-01','2017-11-30']
-
-    if ARGS.output is None:
-        ARGS.output = f'./dataset_{ARGS.trange}_{YEAR}_{MONTH}'
-        ARGS.output += '_clean.csv' if CLEAN else '.csv'
-
-    create_dataset(ARGS.output, TRANGE, SAMPLED, CLEAN)
