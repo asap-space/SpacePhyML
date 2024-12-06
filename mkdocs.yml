@@ -1,0 +1,31 @@
+site_name: SpacePhyML
+site_author: Jonah Ekelund
+site_description: SpacePhyML Documentation
+copyright: Copyright &copy; 2024 Jonah Ekelund
+
+repo_url: https://github.com/Jonah-E/SpacePhyML
+
+nav:
+  - Home: index.md
+  - Quick Start: quick_start.md
+  - User Guide:
+    - Overview: overview.md
+    - Datasets: datasets.md
+  - About: about.md
+
+theme:
+  name: mkdocs
+
+markdown_extensions:
+  - footnotes
+
+plugins:
+  - search
+  - autorefs
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            members_order: source
+            show_source: false
+            show_signature_annotations: true
