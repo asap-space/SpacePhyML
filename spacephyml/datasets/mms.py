@@ -4,7 +4,6 @@ Module containing different datasets.
 
 from torch.utils.data import Dataset
 
-import pandas as pd
 import numpy as np
 
 from ..utils import mms, read_cdf_file, pandas_read_file

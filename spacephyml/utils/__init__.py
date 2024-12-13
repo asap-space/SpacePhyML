@@ -1,6 +1,7 @@
 """
 Common utils used by multiple scripts
 """
+from os import path
 import numpy as np
 import pandas as pd
 import cdflib
@@ -28,10 +29,13 @@ def read_cdf_file(cdf_filepath, variables = None):
     return data
 
 def pandas_read_file(filepath):
-    _, fileformat = path.splittext(filepath)
+    """
+    Wrapper to handle reading data from multiple different fileformats.
+    """
+    _, fileformat = path.split(filepath)
     if fileformat == '.csv':
         return pd.read_csv(filepath)
-    elif fileformat == '.feather':
+    if fileformat == '.feather':
         return pd.read_feather(filepath)
-    else:
-        raise ValueError(f'Unknown filetype: {fileformat}')
+
+    raise ValueError(f'Unknown filetype: {fileformat}')

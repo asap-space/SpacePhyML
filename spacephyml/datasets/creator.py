@@ -79,9 +79,8 @@ def _get_unlabeled_dataset(trange):
     """
     Get a list of data in a given timerange.
     """
+    print(trange)
     raise NotImplementedError
-
-    return None
 
 def get_dataset(label_source, trange, sampled = True,
                 samples_per_label = 5000, clean = False):
@@ -103,7 +102,7 @@ def get_dataset(label_source, trange, sampled = True,
 
     print('Creating dataset based on labels')
     if clean:
-        dataset = dataset.loc[labels['label'] != -1]
+        dataset = dataset.loc[dataset['label'] != -1]
 
     if sampled:
         dataset = dataset.groupby('label').sample(n=samples_per_label)
@@ -134,7 +133,7 @@ def create_dataset(dataset_path, label_source, trange,
 
     labels = get_dataset(label_source, trange=trange, sampled=sampled, clean=clean)
 
-    _, fileformat = path.splittext(dataset_path)
+    _, fileformat = path.split(dataset_path)
     if fileformat == '.csv':
         labels.to_csv(dataset_path)
     elif fileformat == '.feather':
