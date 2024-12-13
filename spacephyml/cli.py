@@ -36,6 +36,8 @@ def pars_args():
     create = actions.add_parser('create', help = 'Create a dataset')
     create.add_argument('--config', default=None,
                         choices=['nov', 'dec'])
+    create.add_argument('--label_source', default='Olshevsky',
+                        choices=['Olshevsky', 'Unlabeled'])
     create.add_argument('--start', default='2017-11-01',
                         help ='Start date, format YYYY-MM-DD')
     create.add_argument('--end', default='2017-11-31',

@@ -35,6 +35,10 @@ def _get_olshevsky_label_list(trange = None):
     """
     if trange is None:
         trange = [datetime(2017,11,1),datetime(2017,12,31)]
+    elif trange[0] < datetime(2017,11,1) or datetime(2017,12,31) < trange[1]:
+        raise ValueError('Invalid time range: range have to be in the range 2017-11-01 ' + \
+                         'to 2017-12-31, (inclusive)')
+
     #Download the labelfiles from Olshevsky
     print('Downloading Olshevsky label files.')
     label_files = [_download_label_file(tempfile.gettempdir() + \
@@ -71,6 +75,14 @@ def _get_olshevsky_label_list(trange = None):
 
     return data.reset_index(drop=True).drop(columns=['date'])
 
+def _get_unlabeled_dataset(trange):
+    """
+    Get a list of data in a given timerange.
+    """
+    raise NotImplementedError
+
+    return None
+
 def get_dataset(label_source, trange, sampled = True,
                 samples_per_label = 5000, clean = False):
     """
@@ -80,27 +92,29 @@ def get_dataset(label_source, trange, sampled = True,
     trange = [datetime.strptime(d,'%Y-%m-%d') for d in trange]
 
     if label_source == 'Olshevsky':
-        print('Generating dataset based on labels from Olshevsky et. al. (2021)')
+        print('Generating a mms dataset based on labels from ')
         print(f'\t{_OLSHEVSKY_REF}')
-        labels = _get_olshevsky_label_list(trange)
-        labels['var_name'] = 'mms1_dis_dist_fast'
+        dataset = _get_olshevsky_label_list(trange)
+        dataset['var_name'] = 'mms1_dis_dist_fast'
+    if label_source == 'Unlabeled':
+        dataset = _get_unlabeled_dataset(trange)
     else:
         raise ValueError(f'Incorrect label_source ({label_source})')
 
     print('Creating dataset based on labels')
     if clean:
-        labels = labels.loc[labels['label'] != -1]
+        dataset = dataset.loc[labels['label'] != -1]
 
     if sampled:
-        labels = labels.groupby('label').sample(n=samples_per_label)
+        dataset = dataset.groupby('label').sample(n=samples_per_label)
         #Change that we actually have enought data here.
-        for label in labels['label'].unique():
-            if len(labels.loc[labels['label'] == label]) < samples_per_label:
+        for label in dataset['label'].unique():
+            if len(dataset.loc[dataset['label'] == label]) < samples_per_label:
                 raise ValueError('Not enought samles to create data set')
 
-    labels.reset_index(drop=True, inplace = True)
+    dataset.reset_index(drop=True, inplace = True)
 
-    return labels
+    return dataset
 
 def create_dataset(dataset_path, label_source, trange,
                    force = False, sampled = True, clean = True):
