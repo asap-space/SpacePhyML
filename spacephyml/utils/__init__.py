@@ -24,7 +24,11 @@ def read_cdf_file(cdf_filepath, variables = None):
     data = {}
     cdf_file = cdflib.cdfread.CDF(cdf_filepath)
     for name, var in variables:
-        data[name] = np.array((cdf_file.varget(var)))
+        try:
+            data[name] = np.array((cdf_file.varget(var)))
+        except:
+            print(f'Failed to read {var} from {cdf_file}')
+            raise
 
     return data
 
