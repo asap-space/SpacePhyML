@@ -9,21 +9,25 @@ def create_action(args):
     Run the create action.
     """
 
-    sampled = args.sampled
-    clean = args.clean
     trange = [args.start, args.end]
+    kwargs = {
+        'force' : args.force,
+        'samples' : args.samples,
+        'clean' : args.clean,
+    }
+
 
     if args.config:
         if args.config == 'dec':
-            clean = True
-            sampled = True
+            kwargs['clean'] = True
+            kwargs['samples'] = 5000
             trange=['2017-12-01','2017-12-31']
         elif args.config == 'nov':
-            clean = False
-            sampled = False
+            kwargs['clean'] = True
+            kwargs['samples'] = 5000
             trange=['2017-11-01','2017-11-30']
 
-    create_dataset(args.output, trange, sampled, clean)
+    create_dataset(args.output, args.label_source, trange, **kwargs)
 
 def pars_args():
     """

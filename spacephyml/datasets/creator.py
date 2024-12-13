@@ -23,7 +23,8 @@ def _download_label_file(outputpath, filedate):
     download_file_with_status(_LABELS_URL_BASE + file, outputpath + file)
     return outputpath + file
 
-_OLSHEVSKY_REF = """Olshevsky, V., et al. (2021). Automated classification of plasma
+_OLSHEVSKY_REF = """
+Olshevsky, V., et al. (2021). Automated classification of plasma
 regions using 3D particle energy distributions. Journal of Geophysical Research:
 Space Physics, https://doi.org/10.1029/2021JA029620
 """
@@ -82,8 +83,7 @@ def _get_unlabeled_dataset(trange):
     print(trange)
     raise NotImplementedError
 
-def get_dataset(label_source, trange, sampled = True,
-                samples_per_label = 5000, clean = False):
+def get_dataset(label_source, trange, clean = True, samples = 0):
     """
     Get a dataset based on a given config.
     """
@@ -95,7 +95,7 @@ def get_dataset(label_source, trange, sampled = True,
         print(f'\t{_OLSHEVSKY_REF}')
         dataset = _get_olshevsky_label_list(trange)
         dataset['var_name'] = 'mms1_dis_dist_fast'
-    if label_source == 'Unlabeled':
+    elif label_source == 'Unlabeled':
         dataset = _get_unlabeled_dataset(trange)
     else:
         raise ValueError(f'Incorrect label_source ({label_source})')
@@ -104,24 +104,27 @@ def get_dataset(label_source, trange, sampled = True,
     if clean:
         dataset = dataset.loc[dataset['label'] != -1]
 
-    if sampled:
-        dataset = dataset.groupby('label').sample(n=samples_per_label)
-        #Change that we actually have enought data here.
+    if samples > 0:
+        dataset = dataset.groupby('label').sample(n=samples)
+
+        #Check that we actually have enought data here.
         for label in dataset['label'].unique():
-            if len(dataset.loc[dataset['label'] == label]) < samples_per_label:
+            if len(dataset.loc[dataset['label'] == label]) < samples:
                 raise ValueError('Not enought samles to create data set')
 
+    dataset.sort_values('epoch', inplace=True)
     dataset.reset_index(drop=True, inplace = True)
 
     return dataset
 
 def create_dataset(dataset_path, label_source, trange,
-                   force = False, sampled = True, clean = True):
+                   force = False, **kwargs):
     """
     Create a dataset file based on given config.
     """
 
-    dirpath, _ = path.split(path.abspath(dataset_path))
+    dataset_path = path.abspath(dataset_path)
+    dirpath, _ = path.split(dataset_path)
     makedirs(dirpath, exist_ok=True)
 
     if path.isfile(dataset_path):
@@ -131,10 +134,13 @@ def create_dataset(dataset_path, label_source, trange,
             print("Dataset exists, aborting")
             return
 
-    labels = get_dataset(label_source, trange=trange, sampled=sampled, clean=clean)
+    labels = get_dataset(label_source, trange=trange, **kwargs)
 
-    _, fileformat = path.split(dataset_path)
+    print(f'Storing dataset at {dataset_path}')
+    _, fileformat = path.splitext(dataset_path)
     if fileformat == '.csv':
         labels.to_csv(dataset_path)
     elif fileformat == '.feather':
         labels.to_feather(dataset_path)
+    else:
+        raise ValueError(f'Unknown filetype {fileformat}')

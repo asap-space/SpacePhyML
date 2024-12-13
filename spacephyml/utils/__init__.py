@@ -32,7 +32,7 @@ def pandas_read_file(filepath):
     """
     Wrapper to handle reading data from multiple different fileformats.
     """
-    _, fileformat = path.split(filepath)
+    _, fileformat = path.splitext(filepath)
     if fileformat == '.csv':
         return pd.read_csv(filepath)
     if fileformat == '.feather':
