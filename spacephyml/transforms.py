@@ -11,6 +11,22 @@ class TransformBase():
     def __call__(self, sample):
         return self.forward(sample)
 
+class Compose(TransformBase):
+    """
+    Compose multiple transforms into one.
+    """
+    def __init__(self,*transforms):
+        self.transforms = transforms
+
+    def forward(self, sample):
+        """
+        Forward call.
+        """
+        for trans in self.transforms:
+            sample = trans(sample)
+
+        return sample
+
 class ZScoreNorm(TransformBase):
     """
     Calculate the Z-Score norm using specified mean and std.
