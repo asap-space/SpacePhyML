@@ -3,7 +3,15 @@ Different useful transforms.
 """
 import numpy as np
 
-class ZScoreNorm():
+class TransformBase():
+    """
+    Base class for the transforms
+    """
+
+    def __call__(self, sample):
+        return self.forward(sample)
+
+class ZScoreNorm(TransformBase):
     """
     Calculate the Z-Score norm using specified mean and std.
     """
@@ -17,7 +25,7 @@ class ZScoreNorm():
         """
         return (((sample[0] - self.mean)/self.std), *sample[1:])
 
-class Threshold():
+class Threshold(TransformBase):
     """
     Threshold the sample.
     """
@@ -39,7 +47,7 @@ class Threshold():
         return (x, *sample[1:])
 
 
-class LogNorm():
+class LogNorm(TransformBase):
     """
     Normalize the data between a given range
     """
@@ -61,7 +69,7 @@ class LogNorm():
 
         return (x, *sample[1:])
 
-class Flatten():
+class Flatten(TransformBase):
     """
     Filter for flattening the data
     """
@@ -71,7 +79,7 @@ class Flatten():
         """
         return (sample[0].reshape(-1), *sample[1:])
 
-class Log10():
+class Log10(TransformBase):
     """
     Calculate the log10 of all non zero values in the sample.
     """
@@ -86,7 +94,7 @@ class Log10():
         return sample
 
 
-class Roll():
+class Roll(TransformBase):
     """
     Perform a roll along a axis.
     """
@@ -106,7 +114,7 @@ class Roll():
 
         return (x, *sample[1:])
 
-class MoveAxis():
+class MoveAxis(TransformBase):
     """
     Move around the axis in the sample.
     """
@@ -121,7 +129,7 @@ class MoveAxis():
         return (np.moveaxis(sample[0],self.src,self.dst),
                 *sample[1:])
 
-class Sum():
+class Sum(TransformBase):
     """
     Callculate the sum along specified axis.
     """
@@ -138,7 +146,7 @@ class Sum():
 
         return (x, *sample[1:])
 
-class Mean():
+class Mean(TransformBase):
     """
     Callculate the mean along specified axis.
     """
