@@ -2,6 +2,7 @@
 Common utils used by multiple scripts
 """
 import numpy as np
+import pandas as pd
 import cdflib
 
 
@@ -25,3 +26,12 @@ def read_cdf_file(cdf_filepath, variables = None):
         data[name] = np.array((cdf_file.varget(var)))
 
     return data
+
+def pandas_read_file(filepath):
+    _, fileformat = path.splittext(filepath)
+    if fileformat == '.csv':
+        return pd.read_csv(filepath)
+    elif fileformat == '.feather':
+        return pd.read_feather(filepath)
+    else:
+        raise ValueError(f'Unknown filetype: {fileformat}')

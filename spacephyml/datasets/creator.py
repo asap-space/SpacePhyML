@@ -134,4 +134,8 @@ def create_dataset(dataset_path, label_source, trange,
 
     labels = get_dataset(label_source, trange=trange, sampled=sampled, clean=clean)
 
-    labels.to_csv(dataset_path)
+    _, fileformat = path.splittext(dataset_path)
+    if fileformat == '.csv':
+        labels.to_csv(dataset_path)
+    elif fileformat == '.feather':
+        labels.to_feather(dataset_path)

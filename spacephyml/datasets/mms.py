@@ -7,7 +7,7 @@ from torch.utils.data import Dataset
 import pandas as pd
 import numpy as np
 
-from ..utils import mms, read_cdf_file
+from ..utils import mms, read_cdf_file, pandas_read_file
 from ..utils.file_download import missing_files
 from ..__init__ import _MMS_DATA_DIR
 
@@ -34,7 +34,7 @@ class MMSDataset(Dataset):
         >>> dataset = MMSDataset('./mydataset.csv')
 
     Args:
-        dataset_path (string): Path to the csv file containing the dataset.
+        dataset_path (string): Path to the file containing the dataset.
         rootdir (string): The override the default rootdir to for the MMS data storage.
         transform (callable): Optional transform to be applied on each sample.
         cache (bool): If data should be cached.
@@ -45,7 +45,7 @@ class MMSDataset(Dataset):
 
     def __init__(self, dataset_path, rootdir = None, transform = None, cache = True):
 
-        self.dataset = pd.read_csv(dataset_path)
+        self.dataset = pandas_read_file(dataset_path)
         self.cache = cache
 
         if rootdir:
