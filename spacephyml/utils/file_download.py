@@ -9,13 +9,13 @@ from tempfile import NamedTemporaryFile
 from tqdm.auto import tqdm
 import requests
 
-def missing_files(files,filepath=''):
+def missing_files(files,rootdir=''):
     """
     Check for missing files.
     """
     missing = []
     for filename in files:
-        if not path.isfile(path.abspath(f'{filepath}{filename}')):
+        if not path.isfile(path.abspath(f'{rootdir}/{filename}')):
             missing.append(filename)
 
     if len(missing) == 0:
