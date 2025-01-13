@@ -60,8 +60,10 @@ def _get_olshevsky_label_list(trange = None):
 
             label = cdf_file.varget(l)
             epoch = cdf_file.varget(e)
-            #TODO: Here the file version is hardcoded, we could dynamicaly check this
-            file = [l[6:] + '_v3.4.0.cdf' for _ in range(len(label))]
+            #TODO: Here the data level and file version is hardcoded,
+            # we could dynamicaly set this.
+            file = [l[6:20] + 'l2_' + l[20:23] + '-' + l[24:] + '_v3.4.0.cdf'
+                        for _ in range(len(label))]
             date = [datetime.strptime(l.split('_')[6][:8],'%Y%m%d')
                     for _ in range(len(label))]
 
