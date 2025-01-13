@@ -65,7 +65,7 @@ class Threshold(TransformBase):
 
 class LogNorm(TransformBase):
     """
-    Normalize the data between a given range
+    Log Normalize the data between a given range
     """
     def __init__ (self, normalization=None):
         self.normalization = normalization
@@ -74,7 +74,7 @@ class LogNorm(TransformBase):
         """
         Forward call.
         """
-        x = sample[0]
+        x = np.log10(sample[0])
 
         if self.normalization is None:
             x -=  x.min()
