@@ -3,12 +3,16 @@ Script for creating dataset based on exisiting labels.
 """
 import tempfile
 from os import path, makedirs, remove
-from datetime import datetime
+import datetime as dt
+from cdflib import cdfepoch
 
 import pandas as pd
+import numpy as np
 
+from ..__init__ import _MMS_DATA_DIR
 from ..utils import read_cdf_file
-from ..utils.file_download import download_file_with_status
+from ..utils.file_download import download_file_with_status, missing_files
+from ..utils import mms
 
 _LABELS_URL_BASE = 'https://bitbucket.org/volshevsky/mmslearning/' + \
                    'raw/7b93d08b585842454c309668870ecd25ea16e3e0/labels_human/'
@@ -29,14 +33,63 @@ regions using 3D particle energy distributions. Journal of Geophysical Research:
 Space Physics, https://doi.org/10.1029/2021JA029620
 """
 
-def _get_olshevsky_label_list(trange = None):
+def _get_var_info(trange, var, epochs):
+    epochs_add = np.zeros(len(epochs)).astype(np.int64)
+
+    #The MMS Data API takes the end date as exclusive
+    trange[1] += dt.timedelta(days=1)
+    trange = [t.strftime("%Y-%m-%d") for t in trange]
+
+
+    #Check which datafiles are relevant
+    files = mms.get_file_list(trange[0], trange[1],
+                            **_VAR_TO_FILE_INFO[var])
+    files = [f['file_name'] for f in files]
+    filespaths = mms.filename_to_filepath(files)
+
+    #Download missing
+    missing = missing_files(filespaths, _MMS_DATA_DIR)
+    if missing:
+        print(f"{len(missing)} data files are missing, downloading")
+        mms.download_cdf_files(_MMS_DATA_DIR, missing)
+
+    #load all the epochs
+    file_epochs = []
+    file_names = []
+    for filename in files:
+        filepath = mms.filename_to_filepath(filename)
+        cdf_file = read_cdf_file(_MMS_DATA_DIR + filepath)
+        tmp = cdf_file.varget('Epoch')
+        file_epochs.extend(tmp)
+        file_names.extend([filename for _ in tmp])
+    file_epochs = np.array(file_epochs)
+
+    files_add = []
+    #For each labeled epoch find the closes from the file
+    for j, epoch_labeled in enumerate(epochs):
+        index = np.abs(file_epochs - epoch_labeled).argmin()
+        epochs_add[j] = file_epochs[index]
+        files_add.append(file_names[index])
+
+        #If the time difference is larger than between the
+        # labeled epochs, set 0
+        time_diff = np.abs(cdfepoch.unixtime(epoch_labeled)
+                           - cdfepoch.unixtime(epochs_add[j]))
+        if time_diff > 4.5:
+            epochs_add[j] = 0
+    return files_add, epochs_add
+
+def _get_olshevsky_label_list(trange = None, var_list = None):
     """
     Get a pandoc DataFrame containing all the Olshevsky labels from within the given
     time range.
     """
+
+    droped_rows = 0
+
     if trange is None:
-        trange = [datetime(2017,11,1),datetime(2017,12,31)]
-    elif trange[0] < datetime(2017,11,1) or datetime(2017,12,31) < trange[1]:
+        trange = [dt.datetime(2017,11,1),dt.datetime(2017,12,31)]
+    elif trange[0] < dt.datetime(2017,11,1) or dt.datetime(2017,12,31) < trange[1]:
         raise ValueError('Invalid time range: range have to be in the range 2017-11-01 ' + \
                          'to 2017-12-31, (inclusive)')
 
@@ -45,7 +98,7 @@ def _get_olshevsky_label_list(trange = None):
     label_files = [_download_label_file(tempfile.gettempdir() + \
                     '/mms_labels/', d) for d in ['201711', '201712']]
 
-    data = {'label':[],'epoch':[],'file':[], 'date':[]}
+    data = {'label':[],'epoch':[], 'date':[]}#, 'file':[]}
     for file in label_files:
         print(f'Processing file {file}')
         cdf_file = read_cdf_file(file)
@@ -60,14 +113,12 @@ def _get_olshevsky_label_list(trange = None):
 
             label = cdf_file.varget(l)
             epoch = cdf_file.varget(e)
-            #TODO: Here the data level and file version is hardcoded,
-            # we could dynamicaly set this.
-            file = [l[6:20] + 'l2_' + l[20:23] + '-' + l[24:] + '_v3.4.0.cdf'
-                        for _ in range(len(label))]
-            date = [datetime.strptime(l.split('_')[6][:8],'%Y%m%d')
+            #TODO: Here the file version is hardcoded, we could dynamicaly check this
+            #file = [l[6:] + '_v3.4.0.cdf' for _ in range(len(label))]
+            date = [dt.datetime.strptime(l.split('_')[6][:8],'%Y%m%d')
                     for _ in range(len(label))]
 
-            data['file'].extend(file)
+            #data['file'].extend(file)
             data['date'].extend(date)
             data['label'].extend(label)
             data['epoch'].extend(epoch)
@@ -76,6 +127,23 @@ def _get_olshevsky_label_list(trange = None):
     data = data.loc[(trange[0] <= data['date']) &
                     (data['date'] <= trange[1])]
 
+    for i, var in enumerate(var_list):
+        print(f'Processing varible: {var}')
+        if not var in _VAR_TO_FILE_INFO:
+            raise ValueError(f'Invalid var requested: {var}')
+
+        files_add, epochs_add = _get_var_info(trange, var, data['epoch'])
+
+        data[f'epoch {i}'] = epochs_add
+        data[f'file {i}'] = files_add
+        data[f'var_name {i}'] = var
+
+        #Drop rows where some varible could not be found
+        row_indexs = data.loc[data[f'epoch {i}']==0].index
+        droped_rows += len(row_indexs)
+        data.drop(row_indexs, inplace=True)
+
+    print(f'{droped_rows} samples droped due to invalid data')
     return data.reset_index(drop=True).drop(columns=['date'])
 
 def _get_unlabeled_dataset(trange):
@@ -85,18 +153,26 @@ def _get_unlabeled_dataset(trange):
     print(trange)
     raise NotImplementedError
 
-def get_dataset(label_source, trange, clean = True, samples = 0):
+_VAR_TO_FILE_INFO = {
+    'mms1_dis_dist_fast': {'data_rate' : 'fast',
+                           'datatype' : 'dis-dist',
+                           'instrument' : 'fpi'},
+    'mms1_dis_energyspectr_omni_fast': {'data_rate' : 'fast',
+                                        'datatype' : 'dis-moms',
+                                        'instrument' : 'fpi'},
+}
+
+def get_dataset(label_source, trange, clean = True, samples = 0, **kwargs):
     """
     Get a dataset based on a given config.
     """
 
-    trange = [datetime.strptime(d,'%Y-%m-%d') for d in trange]
+    trange = [dt.datetime.strptime(d,'%Y-%m-%d') for d in trange]
 
     if label_source == 'Olshevsky':
         print('Generating a mms dataset based on labels from ')
         print(f'\t{_OLSHEVSKY_REF}')
-        dataset = _get_olshevsky_label_list(trange)
-        dataset['var_name'] = 'mms1_dis_dist_fast'
+        dataset = _get_olshevsky_label_list(trange, **kwargs)
     elif label_source == 'Unlabeled':
         dataset = _get_unlabeled_dataset(trange)
     else:

@@ -23,10 +23,14 @@ class MMSDataset(Dataset):
 
     The dataset file have to have the following columns:
 
+    - label : The label corresponding to the sample
     - file : Specifying the corresponding MMS CDF file to read data from.
     - var_name : The variable in the CDF file to read.
     - epoch : The CDF epoch of the sample.
-    - label : The label corresponding to the sample
+
+    Note:
+        If the loading data fail it may be due to the cdf file being corrupt. Delete
+        the failing file and retry.
 
     Examples:
         >>> from spacephyml.datasets import MMSDataset
