@@ -17,6 +17,7 @@ def create_action(args):
         'samples' : args.samples,
         'clean' : args.clean,
         'var_list' : args.var,
+        'resample' : args.resample,
     }
 
     create_dataset(args.output, args.label_source, trange, **kwargs)
@@ -33,12 +34,13 @@ def pars_args():
     create.add_argument('--label_source', default='Olshevsky',
                         choices=['Olshevsky', 'Unlabeled'])
     create.add_argument('--start', default='2017-11-01',
-                        help ='Start date, format YYYY-MM-DD')
+                        help ='Start date, format YYYY-MM-DD/HH:MM:DD')
     create.add_argument('--end', default='2017-11-30',
-                        help ='End date, format YYYY-MM-DD')
+                        help ='End date, format YYYY-MM-DD/HH:MM:DD')
     create.add_argument('--force', action='store_true', default=False)
     create.add_argument('--clean', action='store_true', default=False)
     create.add_argument('--samples', default=0)
+    create.add_argument('--resample', default=None)
     create.add_argument('--var',
                         action = 'append',
                         choices=_VAR_TO_FILE_INFO.keys())

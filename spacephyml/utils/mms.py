@@ -37,7 +37,7 @@ def filename_to_filepath(filename):
 _MMS_DATA_BASE_URL = 'https://lasp.colorado.edu/mms/sdc/public/files/api/v1/'
 
 def get_file_list(start_date,end_date,data_rate = 'fast', datalevel = 'l2',
-                  datatype = 'dis-dist', instrument = 'fpi'):
+                  datatype = None, instrument = 'fpi'):
     """
     Get a list of files from the MMS Science Data center
     """

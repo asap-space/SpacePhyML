@@ -37,13 +37,13 @@ def _get_var_info(trange, var, epochs):
     epochs_add = np.zeros(len(epochs)).astype(np.int64)
 
     #The MMS Data API takes the end date as exclusive
-    trange[1] += dt.timedelta(days=1)
-    trange = [t.strftime("%Y-%m-%d") for t in trange]
+    trange = [trange[0].strftime("%Y-%m-%d"),
+              (trange[1] + dt.timedelta(days=1)).strftime("%Y-%m-%d")]
 
 
     #Check which datafiles are relevant
     files = mms.get_file_list(trange[0], trange[1],
-                            **_VAR_TO_FILE_INFO[var])
+                            **_VAR_TO_FILE_INFO[var]['info'])
     files = [f['file_name'] for f in files]
     filespaths = mms.filename_to_filepath(files)
 
@@ -125,7 +125,7 @@ def _get_olshevsky_label_list(trange = None, var_list = None):
 
     data = pd.DataFrame(data)
     data = data.loc[(trange[0] <= data['date']) &
-                    (data['date'] <= trange[1])]
+                    (data['date'] < trange[1])]
 
     for i, var in enumerate(var_list):
         print(f'Processing varible: {var}')
@@ -146,20 +146,80 @@ def _get_olshevsky_label_list(trange = None, var_list = None):
     print(f'{droped_rows} samples droped due to invalid data')
     return data.reset_index(drop=True).drop(columns=['date'])
 
-def _get_unlabeled_dataset(trange):
+def _get_var(trange, var):
+
+    #The MMS Data API takes the end date as exclusive
+    trange = [trange[0].strftime("%Y-%m-%d"),
+              (trange[1] + dt.timedelta(days=1)).strftime("%Y-%m-%d")]
+
+    #Check which datafiles are relevant
+    files = mms.get_file_list(trange[0], trange[1],
+                            **_VAR_TO_FILE_INFO[var]['info'])
+
+    files = [f['file_name'] for f in files]
+    filespaths = mms.filename_to_filepath(files)
+
+    #Download missing
+    missing = missing_files(filespaths, _MMS_DATA_DIR)
+    if missing:
+        print(f"{len(missing)} data files are missing, downloading")
+        mms.download_cdf_files(_MMS_DATA_DIR, missing)
+
+    #load all the file data
+    df = None
+    for filename in files:
+        filepath = mms.filename_to_filepath(filename)
+        cdf_file = read_cdf_file(_MMS_DATA_DIR + filepath)
+        var_data = cdf_file.varget(var)
+        df = pd.concat([df,
+                pd.DataFrame({k: var_data[:,i] for k, i in _VAR_TO_FILE_INFO[var]['mapping']},
+                  index = pd.to_datetime(
+                             cdfepoch.unixtime(cdf_file.varget('epoch')),unit='s'))])
+
+
+    df = df.sort_index()
+    df = df.loc[(trange[0] <= df.index) &
+                    (df.index < trange[1])]
+
+    return df.sort_index()
+
+def _get_unlabeled_dataset(trange, var_list = None, resample = None):
     """
     Get a list of data in a given timerange.
     """
-    print(trange)
-    raise NotImplementedError
+
+    df_full = pd.DataFrame()
+    for i, var in enumerate(var_list):
+        print(f'Processing varible: {var}')
+        if not var in _VAR_TO_FILE_INFO:
+            raise ValueError(f'Invalid var requested: {var}')
+
+        df_full = df_full.join(
+            _get_var(trange, var), how = 'outer')
+
+    if not resample is None:
+        df_full = df_full.resample(resample).mean()
+
+    df_full['label'] = -1
+
+    return df_full.dropna()
 
 _VAR_TO_FILE_INFO = {
-    'mms1_dis_dist_fast': {'data_rate' : 'fast',
-                           'datatype' : 'dis-dist',
-                           'instrument' : 'fpi'},
-    'mms1_dis_energyspectr_omni_fast': {'data_rate' : 'fast',
-                                        'datatype' : 'dis-moms',
-                                        'instrument' : 'fpi'},
+    'mms1_dis_dist_fast': {
+        'info' : { 'data_rate' : 'fast',
+                    'datatype' : 'dis-dist',
+                    'instrument' : 'fpi'}},
+    'mms1_dis_energyspectr_omni_fast': {
+        'info' : {
+            'data_rate' : 'fast',
+            'datatype' : 'dis-moms',
+            'instrument' : 'fpi'},
+        'mapping' : [(f'Moms {i}', i) for i in range(9)]},
+    'mms1_fgm_b_gsm_srvy_l2': {
+        'info' : {
+            'data_rate' : 'srvy',
+            'instrument' : 'fgm'},
+        'mapping' : [('Bx', 0), ('By', 1), ('Bz',2)]}
 }
 
 def get_dataset(label_source, trange, clean = True, samples = 0, **kwargs):
@@ -167,31 +227,43 @@ def get_dataset(label_source, trange, clean = True, samples = 0, **kwargs):
     Get a dataset based on a given config.
     """
 
-    trange = [dt.datetime.strptime(d,'%Y-%m-%d') for d in trange]
+    for i,t in enumerate(trange):
+        if len(t) == 10:
+            trange[i] = dt.datetime.strptime(t,'%Y-%m-%d')
+        elif len(t) == 19:
+            trange[i] = dt.datetime.strptime(t,'%Y-%m-%d/%H:%M:%S')
+        else:
+            raise ValueError(f'Incorrect datetime format: {t}')
 
     if label_source == 'Olshevsky':
         print('Generating a mms dataset based on labels from ')
         print(f'\t{_OLSHEVSKY_REF}')
         dataset = _get_olshevsky_label_list(trange, **kwargs)
+
+        print('Creating dataset based on labels')
+        if clean:
+            dataset = dataset.loc[dataset['label'] != -1]
+
+        if samples > 0:
+            dataset = dataset.groupby('label').sample(n=samples)
+
+            #Check that we actually have enought data here.
+            for label in dataset['label'].unique():
+                if len(dataset.loc[dataset['label'] == label]) < samples:
+                    raise ValueError('Not enought samles to create data set')
+        dataset.reset_index(drop=True, inplace = True)
+
     elif label_source == 'Unlabeled':
-        dataset = _get_unlabeled_dataset(trange)
+        dataset = _get_unlabeled_dataset(trange, **kwargs)
+
+        if samples > 0:
+            dataset = dataset.sample(n=samples)
+
+            if len(dataset) < samples:
+                raise ValueError('Not enought samles to create data set')
     else:
         raise ValueError(f'Incorrect label_source ({label_source})')
 
-    print('Creating dataset based on labels')
-    if clean:
-        dataset = dataset.loc[dataset['label'] != -1]
-
-    if samples > 0:
-        dataset = dataset.groupby('label').sample(n=samples)
-
-        #Check that we actually have enought data here.
-        for label in dataset['label'].unique():
-            if len(dataset.loc[dataset['label'] == label]) < samples:
-                raise ValueError('Not enought samles to create data set')
-
-    dataset.sort_values('epoch', inplace=True)
-    dataset.reset_index(drop=True, inplace = True)
 
     return dataset
 
