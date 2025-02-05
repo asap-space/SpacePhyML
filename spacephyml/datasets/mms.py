@@ -70,6 +70,10 @@ class ExternalMMSData(Dataset):
 
         for i in range(self.num_vars):
             files = mms.filename_to_filepath(self.dataset[f'file {i}'].unique())
+
+            if not isinstance(files, list):
+                files = [files]
+
             missing = missing_files(files, self.rootdir)
 
             if missing:
