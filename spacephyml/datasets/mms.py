@@ -10,11 +10,12 @@ from ..utils import mms, read_cdf_file, pandas_read_file
 from ..utils.file_download import missing_files
 from ..__init__ import _MMS_DATA_DIR
 
-class MMSDataset(Dataset):
+class ExternalMMSData(Dataset):
     """
     Loading a dataset with labeled MMS data based on dataset file.
 
-    By default SpacePhyML will look for MMS data at the PySPEDAS data location
+    This dataset class looks for datafiles stored in CDF files in another location.
+    By default SpacePhyML will look for external MMS data at the PySPEDAS data location
     ([PySPEDAS](https://pyspedas.readthedocs.io/en/stable/getting_started.html#local-data-directories).)
     If the PySPEDAS environmental variable's are not set data will be placed at
     `$HOME/spacephyml_data/mms`, following the same directory structure as
@@ -30,12 +31,12 @@ class MMSDataset(Dataset):
     - epoch {i} : The CDF epoch to read data from the {i} is a running number.
 
     Note:
-        If the loading data fail it may be due to the cdf file being corrupt. Delete
+        If loading data fail it may be due to the cdf file being corrupt. Delete
         the failing file and retry.
 
     Examples:
-        >>> from spacephyml.datasets import MMSDataset
-        >>> dataset = MMSDataset('./mydataset.csv')
+        >>> from spacephyml.datasets import ExternalMMSData
+        >>> dataset = ExternalMMSData('./mydataset.csv')
 
     Args:
         dataset_path (string): Path to the file containing the dataset.
@@ -92,7 +93,7 @@ class MMSDataset(Dataset):
         if not isinstance(idx, int):
             raise ValueError('Expected idx to be an integer value')
 
-        data_loc = self.dataset.iloc[idx,self.dataset.columns]
+        data_loc = self.dataset.iloc[idx]
 
         sample = []
         for i in range(self.num_vars):
