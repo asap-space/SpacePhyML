@@ -92,7 +92,7 @@ class MMSDataset(Dataset):
         if not isinstance(idx, int):
             raise ValueError('Expected idx to be an integer value')
 
-        data_loc = self.dataset.loc[idx,self.dataset.columns]
+        data_loc = self.dataset.iloc[idx,self.dataset.columns]
 
         sample = []
         for i in range(self.num_vars):

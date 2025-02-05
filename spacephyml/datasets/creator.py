@@ -33,8 +33,7 @@ regions using 3D particle energy distributions. Journal of Geophysical Research:
 Space Physics, https://doi.org/10.1029/2021JA029620
 """
 
-def _get_var_info(trange, var, epochs):
-    epochs_add = np.zeros(len(epochs)).astype(np.int64)
+def _get_var_info(trange, var, epochs = None):
 
     #The MMS Data API takes the end date as exclusive
     trange = [trange[0].strftime("%Y-%m-%d"),
@@ -64,7 +63,12 @@ def _get_var_info(trange, var, epochs):
         file_names.extend([filename for _ in tmp])
     file_epochs = np.array(file_epochs)
 
+    if epochs is None:
+        #If we don't have any epochs to sort on, return everything
+        return file_names, file_epochs
+
     files_add = []
+    epochs_add = np.zeros(len(epochs)).astype(np.int64)
     #For each labeled epoch find the closes from the file
     for j, epoch_labeled in enumerate(epochs):
         index = np.abs(file_epochs - epoch_labeled).argmin()
@@ -77,13 +81,17 @@ def _get_var_info(trange, var, epochs):
                            - cdfepoch.unixtime(epochs_add[j]))
         if time_diff > 4.5:
             epochs_add[j] = 0
+
     return files_add, epochs_add
 
-def _get_olshevsky_label_list(trange = None, var_list = None):
+def _get_olshevsky_label_list(trange = None, var_list = None, resample = None):
     """
     Get a pandoc DataFrame containing all the Olshevsky labels from within the given
     time range.
     """
+
+    if not resample is None:
+        raise ValueError('Resampling is not supported for Olshevsky labels')
 
     droped_rows = 0
 
@@ -124,8 +132,9 @@ def _get_olshevsky_label_list(trange = None, var_list = None):
             data['epoch'].extend(epoch)
 
     data = pd.DataFrame(data)
-    data = data.loc[(trange[0] <= data['date']) &
-                    (data['date'] < trange[1])]
+    data['Time'] = pd.to_datetime(cdfepoch.unixtime(data['epoch']),unit='s')
+    data = data.loc[(trange[0] <= data['Time']) &
+                    (data['Time'] < trange[1])]
 
     for i, var in enumerate(var_list):
         print(f'Processing varible: {var}')
@@ -183,24 +192,61 @@ def _get_var(trange, var):
 
     return df.sort_index()
 
-def _get_unlabeled_dataset(trange, var_list = None, resample = None):
+def _get_unlabeled_list(trange = None, var_list = None):
     """
-    Get a list of data in a given timerange.
+    Get a pandoc DataFrame containing unlabeled epochs in a given
+    time range.
     """
 
-    df_full = pd.DataFrame()
+    droped_rows = 0
+
+    #Grab relevant epochs from the first varible
+    _, epochs = _get_var_info(trange, var_list[0])
+
+    data = pd.DataFrame({'epoch': epochs})
+    data['label'] = -1 #Everything is unlabeled
+    data['Time'] = pd.to_datetime(cdfepoch.unixtime(data['epoch']),unit='s')
+    data = data.loc[(trange[0] <= data['Time']) &
+                    (data['Time'] < trange[1])]
+
     for i, var in enumerate(var_list):
         print(f'Processing varible: {var}')
         if not var in _VAR_TO_FILE_INFO:
             raise ValueError(f'Invalid var requested: {var}')
 
-        df_full = df_full.join(
-            _get_var(trange, var), how = 'outer')
+        files_add, epochs_add = _get_var_info(trange, var, data['epoch'])
+
+        data[f'epoch {i}'] = epochs_add
+        data[f'file {i}'] = files_add
+        data[f'var_name {i}'] = var
+
+        #Drop rows where some varible could not be found
+        row_indexs = data.loc[data[f'epoch {i}']==0].index
+        droped_rows += len(row_indexs)
+        data.drop(row_indexs, inplace=True)
+
+    print(f'{droped_rows} samples droped due to invalid data')
+    return data.reset_index(drop=True)
+def _get_unlabeled_dataset(trange, var_list = None, resample = None):
+    """
+    Get a list of data in a given timerange.
+    """
 
     if not resample is None:
+        df_full = pd.DataFrame()
+        for i, var in enumerate(var_list):
+            print(f'Processing varible: {var}')
+            if not var in _VAR_TO_FILE_INFO:
+                raise ValueError(f'Invalid var requested: {var}')
+
+            df_full = df_full.join(
+                _get_var(trange, var), how = 'outer')
+
         df_full = df_full.resample(resample).mean()
 
-    df_full['label'] = -1
+        df_full['label'] = -1
+    else:
+        df_full = _get_unlabeled_list(trange, var_list)
 
     return df_full.dropna()
 
@@ -222,7 +268,7 @@ _VAR_TO_FILE_INFO = {
         'mapping' : [('Bx', 0), ('By', 1), ('Bz',2)]}
 }
 
-def get_dataset(label_source, trange, clean = True, samples = 0, **kwargs):
+def get_dataset(label_source, trange, resample = None, clean = True, samples = 0, **kwargs):
     """
     Get a dataset based on a given config.
     """
@@ -238,36 +284,31 @@ def get_dataset(label_source, trange, clean = True, samples = 0, **kwargs):
     if label_source == 'Olshevsky':
         print('Generating a mms dataset based on labels from ')
         print(f'\t{_OLSHEVSKY_REF}')
-        dataset = _get_olshevsky_label_list(trange, **kwargs)
-
-        print('Creating dataset based on labels')
-        if clean:
-            dataset = dataset.loc[dataset['label'] != -1]
-
-        if samples > 0:
-            dataset = dataset.groupby('label').sample(n=samples)
-
-            #Check that we actually have enought data here.
-            for label in dataset['label'].unique():
-                if len(dataset.loc[dataset['label'] == label]) < samples:
-                    raise ValueError('Not enought samles to create data set')
-        dataset.reset_index(drop=True, inplace = True)
+        dataset = _get_olshevsky_label_list(trange, resample = resample, **kwargs)
 
     elif label_source == 'Unlabeled':
-        dataset = _get_unlabeled_dataset(trange, **kwargs)
+        dataset = _get_unlabeled_dataset(trange, resample = resample, **kwargs)
 
-        if samples > 0:
-            dataset = dataset.sample(n=samples)
-
-            if len(dataset) < samples:
-                raise ValueError('Not enought samles to create data set')
     else:
         raise ValueError(f'Incorrect label_source ({label_source})')
 
+    if clean:
+        dataset = dataset.loc[dataset['label'] != -1]
+
+    if samples > 0:
+        dataset = dataset.groupby('label').sample(n=samples)
+
+        #Check that we actually have enought data here.
+        for label in dataset['label'].unique():
+            if len(dataset.loc[dataset['label'] == label]) < samples:
+                raise ValueError('Not enought samles to create data set')
+
+    if resample == None:
+        dataset = dataset.reset_index(drop=True)
 
     return dataset
 
-def create_dataset(dataset_path, label_source, trange,
+def create_dataset(dataset_path, trange,
                    force = False, **kwargs):
     """
     Create a dataset file based on given config.
@@ -284,7 +325,7 @@ def create_dataset(dataset_path, label_source, trange,
             print("Dataset exists, aborting")
             return
 
-    labels = get_dataset(label_source, trange=trange, **kwargs)
+    labels = get_dataset(trange=trange, **kwargs)
 
     print(f'Storing dataset at {dataset_path}')
     _, fileformat = path.splitext(dataset_path)

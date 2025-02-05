@@ -18,9 +18,10 @@ def create_action(args):
         'clean' : args.clean,
         'var_list' : args.var,
         'resample' : args.resample,
+        'label_source' :args.label_source,
     }
 
-    create_dataset(args.output, args.label_source, trange, **kwargs)
+    create_dataset(args.output, trange, **kwargs)
 
 def pars_args():
     """
