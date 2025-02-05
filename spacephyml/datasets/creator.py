@@ -226,6 +226,8 @@ def _get_unlabeled_list(trange = None, var_list = None):
         data.drop(row_indexs, inplace=True)
 
     print(f'{droped_rows} samples droped due to invalid data')
+
+    data = data.sort_values(by='Time')
     return data.reset_index(drop=True)
 def _get_unlabeled_dataset(trange, var_list = None, resample = None):
     """
