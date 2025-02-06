@@ -23,13 +23,10 @@ def filename_to_filepath(filename):
     for fn in filename:
         fs = fn.split('_')
 
-        if len(fs) != 7:
-            raise ValueError(f'Filename ({fn}) have unexpected format')
-
-        year = fs[5][:4]
-        month = fs[5][4:6]
+        year = fs[-2][:4]
+        month = fs[-2][4:6]
         filepaths.append(
-                './mms/' + '/'.join(fs[:5]) + f'/{year}/{month}/{fn}')
+                './mms/' + '/'.join(fs[:-2]) + f'/{year}/{month}/{fn}')
 
     if len(filepaths) == 1:
         return filepaths[0]
@@ -40,13 +37,16 @@ def filename_to_filepath(filename):
 _MMS_DATA_BASE_URL = 'https://lasp.colorado.edu/mms/sdc/public/files/api/v1/'
 
 def get_file_list(start_date,end_date,data_rate = 'fast', datalevel = 'l2',
-                  datatype = 'dis-dist'):
+                  datatype = None, instrument = 'fpi'):
     """
     Get a list of files from the MMS Science Data center
     """
     url = f'{_MMS_DATA_BASE_URL}file_info/science?'
-    url += f'start_date={start_date}&end_date={end_date}&sc_id=mms1&instrument_id=fpi'
-    url += f'&data_rate_mode={data_rate}&data_level={datalevel}&descriptor={datatype}'
+    url += f'start_date={start_date}&end_date={end_date}&sc_id=mms1'
+    url += f'&instrument_id={instrument}'
+    url += f'&data_rate_mode={data_rate}&data_level={datalevel}'
+    if not datatype is None:
+        url += f'&descriptor={datatype}'
 
     with requests.Session() as session:
         r = session.get(url)

@@ -14,7 +14,7 @@ _HOME = '~'
 if 'HOME' in environ:
     _HOME = environ['HOME']
 
-_MMS_DATA_DIR = f'{_HOME}/spacephyml_data/mms'
+_MMS_DATA_DIR = f'{_HOME}/spacephyml_data/mms/'
 
 # Check for PySpedas directories
 if 'MMS_DATA_DIR' in environ:
