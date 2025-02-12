@@ -180,8 +180,14 @@ def _get_var(trange, var):
         filepath = mms.filename_to_filepath(filename)
         cdf_file = read_cdf_file(_MMS_DATA_DIR + filepath)
         var_data = cdf_file.varget(var)
+        if len(_VAR_TO_FILE_INFO[var]['mapping']) > 1:
+            tmp = {k: var_data[:,i] for k, i in _VAR_TO_FILE_INFO[var]['mapping']}
+
+        else:
+            tmp = {k: var_data[:] for k, _ in _VAR_TO_FILE_INFO[var]['mapping']}
+
         df = pd.concat([df,
-                pd.DataFrame({k: var_data[:,i] for k, i in _VAR_TO_FILE_INFO[var]['mapping']},
+                pd.DataFrame(tmp,
                   index = pd.to_datetime(
                              cdfepoch.unixtime(cdf_file.varget('epoch')),unit='s'))])
 
@@ -262,6 +268,18 @@ _VAR_TO_FILE_INFO = {
             'datatype' : 'dis-moms',
             'instrument' : 'fpi'},
         'mapping' : [(f'Moms {i}', i) for i in range(32)]},
+    'mms1_dis_bulkv_gse_fast': {
+        'info' : {
+            'data_rate' : 'fast',
+            'datatype' : 'dis-moms',
+            'instrument' : 'fpi'},
+        'mapping' : [('Vx', 0), ('Vy', 1), ('Vz',2)]},
+    'mms1_dis_numberdensity_fast': {
+        'info' : {
+            'data_rate' : 'fast',
+            'datatype' : 'dis-moms',
+            'instrument' : 'fpi'},
+        'mapping' : [('Number Density', None)]},
     'mms1_fgm_b_gsm_srvy_l2': {
         'info' : {
             'data_rate' : 'srvy',
