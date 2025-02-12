@@ -185,11 +185,6 @@ def _get_var(trange, var):
                   index = pd.to_datetime(
                              cdfepoch.unixtime(cdf_file.varget('epoch')),unit='s'))])
 
-
-    df = df.sort_index()
-    df = df.loc[(trange[0] <= df.index) &
-                    (df.index < trange[1])]
-
     return df.sort_index()
 
 def _get_unlabeled_list(trange = None, var_list = None):
@@ -247,6 +242,10 @@ def _get_unlabeled_dataset(trange, var_list = None, resample = None):
         df_full = df_full.resample(resample).mean()
 
         df_full['label'] = -1
+        df_full = df_full.sort_index()
+
+        df_full = df_full.loc[(trange[0] <= df_full.index) &
+                        (df_full.index < trange[1])]
     else:
         df_full = _get_unlabeled_list(trange, var_list)
 
@@ -262,7 +261,7 @@ _VAR_TO_FILE_INFO = {
             'data_rate' : 'fast',
             'datatype' : 'dis-moms',
             'instrument' : 'fpi'},
-        'mapping' : [(f'Moms {i}', i) for i in range(9)]},
+        'mapping' : [(f'Moms {i}', i) for i in range(32)]},
     'mms1_fgm_b_gsm_srvy_l2': {
         'info' : {
             'data_rate' : 'srvy',

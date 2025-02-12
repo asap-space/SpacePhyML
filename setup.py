@@ -19,6 +19,7 @@ setup(
                       'requests',
                       'cdflib',
                       'tqdm',
+                      'pyarrow',
                       ],
 
     classifiers=[

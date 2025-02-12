@@ -35,10 +35,11 @@ class PandasDataset(Dataset):
     """
 
     def __init__(self, dataset_path, transform = None, data_columns = None,
-                 label_column = None):
+                 label_column = None, return_index = True):
 
         self.dataset = pandas_read_file(dataset_path)
         self.label_column = label_column
+        self.return_index = return_index
 
         self.data_columns = data_columns
         if self.data_columns is None:
@@ -62,8 +63,13 @@ class PandasDataset(Dataset):
         if self.transform:
             data = self.transform(data)
 
+        sample = [data]
         if self.label_column:
             label = np.array(self.dataset.iloc[idx][self.label_column])
-            return (data, label)
+            sample.append(label)
 
-        return (data,)
+        if self.return_index:
+            index = self.dataset.index[idx]
+            sample.append(index)
+
+        return sample
