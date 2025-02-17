@@ -267,7 +267,7 @@ _VAR_TO_FILE_INFO = {
             'data_rate' : 'fast',
             'datatype' : 'dis-moms',
             'instrument' : 'fpi'},
-        'mapping' : [(f'Moms {i}', i) for i in range(32)]},
+        'mapping' : [(f'Ion Spec. {i}', i) for i in range(32)]},
     'mms1_dis_bulkv_gse_fast': {
         'info' : {
             'data_rate' : 'fast',
