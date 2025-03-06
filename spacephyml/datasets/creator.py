@@ -280,6 +280,18 @@ _VAR_TO_FILE_INFO = {
             'datatype' : 'dis-moms',
             'instrument' : 'fpi'},
         'mapping' : [('Number Density', None)]},
+    'mms1_dis_temppara_fast': {
+        'info' : {
+            'data_rate' : 'fast',
+            'datatype' : 'dis-moms',
+            'instrument' : 'fpi'},
+        'mapping' : [('Ion Temp. par.', None)]},
+    'mms1_dis_tempperp_fast': {
+        'info' : {
+            'data_rate' : 'fast',
+            'datatype' : 'dis-moms',
+            'instrument' : 'fpi'},
+        'mapping' : [('Ion Temp. perp.', None)]},
     'mms1_fgm_b_gsm_srvy_l2': {
         'info' : {
             'data_rate' : 'srvy',
