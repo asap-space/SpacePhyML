@@ -10,7 +10,9 @@ nav:
   - Quick Start: quick_start.md
   - User Guide:
     - Overview: user_guide/overview.md
-    - Datasets: user_guide/datasets.md
+    - Datasets:
+    - General: user_guide/datasets_general.md
+    - MMS: user_guide/datasets_mms.md
     - Dataset Creator : user_guide/dataset_creator.md
     - Examples : user_guide/examples.md
 
