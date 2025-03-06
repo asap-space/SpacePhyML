@@ -1,7 +1,6 @@
 # Dataloaders
 
 
-## API
+###  spacephyml.datasets.general.mms
 
-::: spacephyml.datasets.ExternalMMSData
 

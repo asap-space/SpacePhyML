@@ -6,9 +6,9 @@ from torch.utils.data import Dataset
 
 import numpy as np
 
-from ..utils import mms, read_cdf_file, pandas_read_file
-from ..utils.file_download import missing_files
-from ..__init__ import _MMS_DATA_DIR
+from ...utils import mms, read_cdf_file, pandas_read_file
+from ...utils.file_download import missing_files
+from ...__init__ import _MMS_DATA_DIR
 
 class ExternalMMSData(Dataset):
     """
@@ -30,7 +30,7 @@ class ExternalMMSData(Dataset):
     - var_name {i} : The variable in the CDF file to read, the {i} is a running number.
     - epoch {i} : The CDF epoch to read data from the {i} is a running number.
 
-    Note:
+    Warning:
         If loading data fail it may be due to the cdf file being corrupt. Delete
         the failing file and retry.
 
@@ -39,16 +39,17 @@ class ExternalMMSData(Dataset):
         >>> dataset = ExternalMMSData('./mydataset.csv')
 
     Args:
-        dataset_path (string): Path to the file containing the dataset.
-        rootdir (string): The override the default rootdir to for the MMS data storage.
-        transform (callable): Optional transform to be applied on each sample.
-        cache (bool): If data should be cached.
-        return_epoch (bool): If the label epoch should be returned.
+        dataset_path (string):
+            Path to the file containing the dataset.
+        rootdir (string):
+            The override the default rootdir to for the MMS data storage.
+        transform (callable):
+            Optional transform to be applied on each sample.
+        cache (bool):
+            If data should be cached.
+        return_epoch (bool):
+            If the label epoch should be returned.
 
-    Returns:
-        Will return a list with with all the data varibles in a list followed by the label.
-        If 'return_epoch = True' is set the the label epoch of the data will also be
-        returned.
 
     """
 
@@ -94,6 +95,13 @@ class ExternalMMSData(Dataset):
         return self.length
 
     def __getitem__(self, idx):
+        """
+        Returns:
+            (typle):
+                Will return a list with with all the data varibles in a list followed by the label.
+                If 'return_epoch = True' is set the the label epoch of the data will also be
+                returned.
+        """
         if not isinstance(idx, int):
             raise ValueError('Expected idx to be an integer value')
 
