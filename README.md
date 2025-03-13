@@ -2,6 +2,6 @@
 Dataset and tools for space physics machine learning
 
 # TODO
-- [ ] Fix pylint
-- [ ] Add tests
+- [ ] Add flake8 ckeck
+- [ ] Add support for pytests
 
