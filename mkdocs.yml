@@ -11,7 +11,6 @@ nav:
   - User Guide:
     - Overview: user_guide/overview.md
     - Datasets:
-      - General: user_guide/datasets_general.md
       - MMS: user_guide/datasets_mms.md
     - Dataset Creator : user_guide/dataset_creator.md
     - Examples : user_guide/examples.md
