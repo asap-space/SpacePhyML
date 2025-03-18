@@ -36,7 +36,7 @@ Youtube: [youtube.com/@ASAP-space-eu](https://www.youtube.com/@ASAP-space-eu)
 
 ---
 
-<img src="img/Flag_of_Europe.svg" alt="Flag" style="float:left; margin:10px" width="50px">
+<img src="docs/img/Flag_of_Europe.svg" alt="Flag" style="float:left; margin:10px" width="50px">
 
 *ASAP has received funding from the European Union’s HORIZON Research and Innovation Action under the Grant Agreement No 101082633. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union.*
 
