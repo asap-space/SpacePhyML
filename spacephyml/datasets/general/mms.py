@@ -35,7 +35,7 @@ class ExternalMMSData(Dataset):
         the failing file and retry.
 
     Examples:
-        >>> from spacephyml.datasets import ExternalMMSData
+        >>> from spacephyml.datasets.general import ExternalMMSData
         >>> dataset = ExternalMMSData('./mydataset.csv')
 
     Args:

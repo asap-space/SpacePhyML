@@ -52,7 +52,6 @@ class Threshold():
 
         return (x, *sample[1:])
 
-
 class LogNorm():
     """
     Log Normalize the data between a given range
@@ -119,6 +118,19 @@ class MoveAxis():
     def __call__(self, sample):
         return (np.moveaxis(sample[0],self.src,self.dst),
                 *sample[1:])
+
+class Roll():
+    def __init__ (self, shift = 16, axis = -2):
+        self.shift = shift
+        self. axis = axis
+
+    def __call__ (self, sample):
+        x = sample[0]
+
+        #Roll along Phi
+        x = np.roll( x, self.shift, axis=self.axis)
+
+        return (x, *sample[1:])
 
 class Sum():
     """
