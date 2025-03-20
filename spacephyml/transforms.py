@@ -3,31 +3,27 @@ Different useful transforms.
 """
 import numpy as np
 
-class TransformBase():
-    """
-    Base class for the transforms
-    """
-
-    def __call__(self, sample):
-        return self.forward(sample)
-
-class Compose(TransformBase):
+class Compose():
     """
     Compose multiple transforms into one.
+
+    Examples:
+        >>> import spacephyml.transforms as tf
+        >>> transforms = tf.Compose(tf.Threshold(0,1), tf.Flatten())
+
+    Args:
+        transforms (callables) : All the transforms to compose.
     """
     def __init__(self,*transforms):
         self.transforms = transforms
 
-    def forward(self, sample):
-        """
-        Forward call.
-        """
+    def __call__(self, sample):
         for trans in self.transforms:
             sample = trans(sample)
 
         return sample
 
-class ZScoreNorm(TransformBase):
+class ZScoreNorm():
     """
     Calculate the Z-Score norm using specified mean and std.
     """
@@ -35,23 +31,17 @@ class ZScoreNorm(TransformBase):
         self.mean = mean
         self.std = std
 
-    def forward(self, sample):
-        """
-        Forward call.
-        """
+    def __call__(self, sample):
         return (((sample[0] - self.mean)/self.std), *sample[1:])
 
-class Threshold(TransformBase):
+class Threshold():
     """
     Threshold the sample.
     """
-    def __init__ (self, thresholds=None):
+    def __init__ (self, thresholds):
         self.thresholds = thresholds
 
-    def forward(self, sample):
-        """
-        Forward call.
-        """
+    def __call__(self, sample):
         x = sample[0]
 
         threshold_low_index = np.where( x < self.thresholds[0])
@@ -63,17 +53,14 @@ class Threshold(TransformBase):
         return (x, *sample[1:])
 
 
-class LogNorm(TransformBase):
+class LogNorm():
     """
     Log Normalize the data between a given range
     """
     def __init__ (self, normalization=None):
         self.normalization = normalization
 
-    def forward(self, sample):
-        """
-        Forward call.
-        """
+    def __call__(self, sample):
         x = np.log10(sample[0])
 
         if self.normalization is None:
@@ -85,24 +72,18 @@ class LogNorm(TransformBase):
 
         return (x, *sample[1:])
 
-class Flatten(TransformBase):
+class Flatten():
     """
     Filter for flattening the data
     """
-    def forward(self, sample):
-        """
-        Forward call.
-        """
+    def __call__(self, sample):
         return (sample[0].reshape(-1), *sample[1:])
 
-class Log10(TransformBase):
+class Log10():
     """
     Calculate the log10 of all non zero values in the sample.
     """
-    def forward(self, sample):
-        """
-        Forward call.
-        """
+    def __call__(self, sample):
         non_zero_indexes = np.where(sample[0]!=0)
 
         #Talk log10 of all non_zero values
@@ -110,7 +91,7 @@ class Log10(TransformBase):
         return sample
 
 
-class Roll(TransformBase):
+class Roll():
     """
     Perform a roll along a axis.
     """
@@ -119,10 +100,7 @@ class Roll(TransformBase):
         self.shift = shift
         self.axis = axis
 
-    def forward(self, sample):
-        """
-        Forward call.
-        """
+    def __call__(self, sample):
         x = sample[0]
 
         #Roll along Phi
@@ -130,7 +108,7 @@ class Roll(TransformBase):
 
         return (x, *sample[1:])
 
-class MoveAxis(TransformBase):
+class MoveAxis():
     """
     Move around the axis in the sample.
     """
@@ -138,41 +116,32 @@ class MoveAxis(TransformBase):
         self.src = src
         self.dst = dst
 
-    def forward(self, sample):
-        """
-        Forward call.
-        """
+    def __call__(self, sample):
         return (np.moveaxis(sample[0],self.src,self.dst),
                 *sample[1:])
 
-class Sum(TransformBase):
+class Sum():
     """
-    Callculate the sum along specified axis.
+    Calculate the sum along specified axis.
     """
     def __init__ (self, axis = -1):
         self.axis = axis
 
-    def forward(self, sample):
-        """
-        Forward call.
-        """
+    def __call__(self, sample):
         x = sample[0]
 
         x = np.sum(x, axis=self.axis)
 
         return (x, *sample[1:])
 
-class Mean(TransformBase):
+class Mean():
     """
-    Callculate the mean along specified axis.
+    Calculate the mean along specified axis.
     """
     def __init__ (self, axis = -1):
         self.axis = axis
 
-    def forward(self, sample):
-        """
-        Forward call.
-        """
+    def __call__(self, sample):
         x = sample[0]
 
         x = np.mean(x, axis=self.axis)

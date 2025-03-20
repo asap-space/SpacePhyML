@@ -12,6 +12,14 @@ import requests
 def missing_files(files,rootdir=''):
     """
     Check for missing files.
+
+    Args:
+        files (list): The files (including path) to check.
+        rootdir (string) : A root path to add before the paths in the files list.
+
+    Returns:
+        A list of files (from the files argument) that does not exist.
+        Will return 'None' if all files exists.
     """
     missing = []
     for filename in files:
@@ -25,7 +33,12 @@ def missing_files(files,rootdir=''):
 
 def download_file_with_status(url_file, filepath, session = None):
     """
-    Download files with a progress bar.
+    Download one file with a progress bar.
+
+    Args:
+        url_file (string) : The URL for downloading the file.
+        filepath (string) : The file path for storing the file
+        session : The request session to use, if one exist.
     """
     close_session = False
     if session is None:
