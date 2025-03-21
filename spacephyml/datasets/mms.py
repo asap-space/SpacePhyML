@@ -4,12 +4,11 @@ Specific MMS Datasets.
 
 from os import makedirs
 
-from torch import unsqueeze, from_numpy
 import numpy as np
 
 from .general.mms import ExternalMMSData
 from ..utils.file_download import missing_files, download_file_with_status
-from ..transforms import Compose, Threshold, LogNorm, Roll
+from ..transforms import MMS1IonDistLabeled_Transform
 
 
 class MMS1IonDistLabeled(ExternalMMSData):
@@ -61,11 +60,6 @@ class MMS1IonDistLabeled(ExternalMMSData):
             download_file_with_status(self._datasets[dataset]['url'], filepath)
 
         if transform is None:
-            transform = Compose(Threshold((np.power(10.0, -28),
-                                           np.power(10.0, -17))),
-                                LogNorm((-28, -17)),
-                                Roll(),
-                                lambda x: unsqueeze(from_numpy(x), 0),
-                                )
+            transform = MMS1IonDistLabeled_Transform()
 
         super().__init__(filepath, data_root, transform, cache)

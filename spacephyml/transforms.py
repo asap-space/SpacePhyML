@@ -2,6 +2,7 @@
 Different useful transforms.
 """
 import numpy as np
+from torch import unsqueeze, from_numpy
 
 
 class Compose():
@@ -23,6 +24,21 @@ class Compose():
             sample = trans(sample)
 
         return sample
+
+class MMS1IonDistLabeled_Transform(Compose):
+    """
+    The default transform used in MMS1IonDistLabeled.
+
+    Args:
+        norm (tuple): The values to threshold and calculate LogNorm with.
+
+    """
+    def __init__(self, norm = (-28, -17)):
+        super().__init__(Threshold((np.power(10.0, norm[0]),
+                                    np.power(10.0, norm[1]))),
+                         LogNorm(norm),
+                         Roll(),
+                         lambda x: unsqueeze(from_numpy(x), 0))
 
 
 class ZScoreNorm():

@@ -1,7 +1,7 @@
 # Dataset Creator
 The dataset creator enables the creation of new datasets based on existing data and label
 sources. The data set creator can be used either with the command line interface (CLI)
-described below or in an python script using the API described [here](../../reference/datasets/creator.md).
+described below or in an python script using the API described [here](../reference/datasets/creator.md).
 
 ## CLI
 
@@ -51,8 +51,8 @@ Once created the dataset can be loaded using one of the general loaders.
 
 | Mission | Resampled | Dataset Class |
 | ------- | --------- | ------------- |
-| MMS | Yes | [PandasDataset](../../reference/datasets/general/pandas.md#PandasDataset) |
-| MMS | No | [ExternalMMSData](../../reference/datasets/general/mms.md#ExternalMMSData) |
+| MMS | Yes | [PandasDataset](../reference/datasets/general/pandas.md#PandasDataset) |
+| MMS | No | [ExternalMMSData](../reference/datasets/general/mms.md#ExternalMMSData) |
 
 ## Olshevsky labels
 These labels are from the work of Olshevsky, et al.[^1] who labeled data from the MMS1 spacecraft for November and December 2017. The labeled data is from the Earth's dayside and is labeled as one of the regions in the table below.

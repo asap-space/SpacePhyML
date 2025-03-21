@@ -21,10 +21,12 @@ theme:
 
 markdown_extensions:
   - footnotes
+
 watch:
   - docs
   - spacephyml
   - scripts
+  - examples
 
 plugins:
   - search
@@ -32,6 +34,7 @@ plugins:
   - gen-files:
       scripts:
         - scripts/gen_ref_pages.py
+        - scripts/gen_ex_page.py
   - literate-nav:
       nav_file: SUMMARY.md
   - mkdocstrings:
