@@ -34,7 +34,7 @@ class ZScoreNorm():
         self.std = std
 
     def __call__(self, sample):
-        return (((sample[0] - self.mean)/self.std), *sample[1:])
+        return ((sample - self.mean)/self.std)
 
 
 class Threshold():
@@ -45,7 +45,7 @@ class Threshold():
         self.thresholds = thresholds
 
     def __call__(self, sample):
-        x = sample[0]
+        x = sample
 
         threshold_low_index = np.where(x < self.thresholds[0])
         x[threshold_low_index] = self.thresholds[0]
@@ -53,7 +53,7 @@ class Threshold():
         threshold_high_index = np.where(x > self.thresholds[1])
         x[threshold_high_index] = self.thresholds[1]
 
-        return (x, *sample[1:])
+        return x
 
 
 class LogNorm():
@@ -64,7 +64,7 @@ class LogNorm():
         self.normalization = normalization
 
     def __call__(self, sample):
-        x = np.log10(sample[0])
+        x = np.log10(sample)
 
         if self.normalization is None:
             x -= x.min()
@@ -73,7 +73,7 @@ class LogNorm():
             x -= self.normalization[0]
             x /= (self.normalization[1] - self.normalization[0])
 
-        return (x, *sample[1:])
+        return x
 
 
 class Flatten():
@@ -81,18 +81,17 @@ class Flatten():
     Filter for flattening the data
     """
     def __call__(self, sample):
-        return (sample[0].reshape(-1), *sample[1:])
-
+        return sample.reshape(-1)
 
 class Log10():
     """
     Calculate the log10 of all non zero values in the sample.
     """
     def __call__(self, sample):
-        non_zero_indexes = np.where(sample[0] != 0)
+        non_zero_indexes = np.where(sample != 0)
 
         # Talk log10 of all non_zero values
-        sample[0][non_zero_indexes] = np.log10(sample[0][non_zero_indexes])
+        sample[non_zero_indexes] = np.log10(sample[non_zero_indexes])
         return sample
 
 
@@ -106,12 +105,12 @@ class Roll():
         self.axis = axis
 
     def __call__(self, sample):
-        x = sample[0]
+        x = sample
 
         # Roll along Phi
         x = np.roll(x, self.shift, axis=self.axis)
 
-        return (x, *sample[1:])
+        return x
 
 
 class MoveAxis():
@@ -123,8 +122,7 @@ class MoveAxis():
         self.dst = dst
 
     def __call__(self, sample):
-        return (np.moveaxis(sample[0], self.src, self.dst),
-                *sample[1:])
+        return np.moveaxis(sample, self.src, self.dst)
 
 
 class Sum():
@@ -135,11 +133,11 @@ class Sum():
         self.axis = axis
 
     def __call__(self, sample):
-        x = sample[0]
+        x = sample
 
         x = np.sum(x, axis=self.axis)
 
-        return (x, *sample[1:])
+        return x
 
 
 class Mean():
@@ -150,8 +148,8 @@ class Mean():
         self.axis = axis
 
     def __call__(self, sample):
-        x = sample[0]
+        x = sample
 
         x = np.mean(x, axis=self.axis)
 
-        return (x, *sample[1:])
+        return x

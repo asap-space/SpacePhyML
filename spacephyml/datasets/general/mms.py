@@ -145,12 +145,12 @@ class ExternalMMSData(Dataset):
                         data['epoch'] == data_loc[f'epoch {i}'])
                 sample.append(self.data[data_loc[f'file {i}']]['var'][index])
 
+        if self.transform:
+            sample[0] = self.transform(sample[0])
+
         sample.append(data_loc.label)
 
         if self.return_epoch:
             sample.append(data_loc.epoch)
-
-        if self.transform:
-            sample = self.transform(sample)
 
         return sample
