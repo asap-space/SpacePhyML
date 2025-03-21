@@ -15,7 +15,7 @@ create_dataset('./mms_region.csv',
 
 dataset = ExternalMMSData('./mms_region.csv',
                           transform = MMS1IonDistLabeled_Transform())
-model = PCReduced(seed='42')
+model = PCReduced()
 
 labels = {'human': [], 'classifier': []}
 for x,l, _, in DataLoader(dataset, batch_size=32, shuffle = True):
