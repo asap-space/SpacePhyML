@@ -4,6 +4,7 @@ Specific MMS Datasets.
 
 from os import makedirs
 
+from torch import unsqueeze, from_numpy
 import numpy as np
 
 from .general.mms import ExternalMMSData
@@ -63,6 +64,8 @@ class MMS1IonDistLabeled(ExternalMMSData):
             transform = Compose(Threshold((np.power(10.0, -28),
                                            np.power(10.0, -17))),
                                 LogNorm((-28, -17)),
-                                Roll())
+                                Roll(),
+                                lambda x: unsqueeze(from_numpy(x), 0),
+                                )
 
         super().__init__(filepath, data_root, transform, cache)
