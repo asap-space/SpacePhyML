@@ -6,6 +6,7 @@ import requests
 
 from .file_download import download_file_with_status
 
+
 def filename_to_filepath(filename):
     """
     Create a filepath based on the filename for a mms CDF file
@@ -39,13 +40,16 @@ def filename_to_filepath(filename):
     return filepaths
 
 
-
 _MMS_DATA_BASE_URL = 'https://lasp.colorado.edu/mms/sdc/public/files/api/v1/'
 
-def get_file_list(start_date,end_date,data_rate = 'fast', data_level = 'l2',
-                  datatype = None, instrument = 'fpi', sc_id = 'mms1'):
+
+def get_file_list(start_date, end_date, data_rate='fast', data_level='l2',
+                  datatype=None, instrument='fpi', sc_id='mms1'):
     """
-    Get a list of files from the MMS Science Data center. For a full list of the possible parameters, look at "Query Parameters" on the MMS Science Data center, "How to get data" page: [https://lasp.colorado.edu/mms/sdc/public/about/how-to/](https://lasp.colorado.edu/mms/sdc/public/about/how-to/)
+    Get a list of files from the MMS Science Data center. For a full list of
+    the possible parameters, look at "Query Parameters" on the MMS Science
+    Data center, "How to get data" page:
+    [https://lasp.colorado.edu/mms/sdc/public/about/how-to/](https://lasp.colorado.edu/mms/sdc/public/about/how-to/)
 
     Args:
         start_date (string) : The start date for files, format YYYY-MM-DD.
@@ -63,7 +67,7 @@ def get_file_list(start_date,end_date,data_rate = 'fast', data_level = 'l2',
     url += f'start_date={start_date}&end_date={end_date}&sc_id={sc_id}'
     url += f'&instrument_id={instrument}'
     url += f'&data_rate_mode={data_rate}&data_level={data_level}'
-    if not datatype is None:
+    if datatype is not None:
         url += f'&descriptor={datatype}'
 
     with requests.Session() as session:
@@ -73,14 +77,16 @@ def get_file_list(start_date,end_date,data_rate = 'fast', data_level = 'l2',
 
     return files
 
-def download_cdf_files(rootdir, cdf_filepaths, session = None):
+
+def download_cdf_files(rootdir, cdf_filepaths, session=None):
     """
     Download CDF files from the MMS Science Data Center based on a file list.
 
     Args:
         rootdir (string): Root directory for storing downloaded files.
-        cdf_filepaths (list) : The paths to store the files (including filename).
-            The filename have to be the same as the file to download.
+        cdf_filepaths (list) : The paths to store the files (including
+            filename). The filename have to be the same as the file to
+            download.
         session  : The request session to use, if one exists.
     """
     close_session = False
@@ -91,7 +97,7 @@ def download_cdf_files(rootdir, cdf_filepaths, session = None):
     t_cnt = len(cdf_filepaths)
     rootdir = rootdir[:-1] if rootdir[-1] == '/' else rootdir
 
-    for cnt, filepath in enumerate(cdf_filepaths,1):
+    for cnt, filepath in enumerate(cdf_filepaths, 1):
         dirpath, filename = path.split(filepath)
         makedirs(f'{rootdir}/{dirpath}', exist_ok=True)
         url_file = f'{_MMS_DATA_BASE_URL}download/science?file={filename}'

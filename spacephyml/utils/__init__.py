@@ -7,7 +7,7 @@ import pandas as pd
 import cdflib
 
 
-def read_cdf_file(cdf_filepath, variables = None):
+def read_cdf_file(cdf_filepath, variables=None):
     """
     Read a cdf file, either fully or only a subset.
 
@@ -31,6 +31,7 @@ def read_cdf_file(cdf_filepath, variables = None):
             raise
 
     return data
+
 
 def pandas_read_file(filepath):
     """

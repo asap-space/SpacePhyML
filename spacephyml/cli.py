@@ -4,6 +4,7 @@ Script for creating dataset based on exisiting labels.
 from argparse import ArgumentParser
 from .datasets.creator import create_dataset, _VAR_TO_FILE_INFO
 
+
 def create_action(args):
     """
     Run the create action.
@@ -13,15 +14,16 @@ def create_action(args):
 
     trange = [args.start, args.end]
     kwargs = {
-        'force' : args.force,
-        'samples' : args.samples,
-        'clean' : args.clean,
-        'var_list' : args.var,
-        'resample' : args.resample,
-        'label_source' :args.label_source,
+        'force': args.force,
+        'samples': args.samples,
+        'clean': args.clean,
+        'var_list': args.var,
+        'resample': args.resample,
+        'label_source': args.label_source,
     }
 
     create_dataset(args.output, trange, **kwargs)
+
 
 def pars_args():
     """
@@ -31,19 +33,19 @@ def pars_args():
 
     actions = parser.add_subparsers(dest="command")
 
-    create = actions.add_parser('create', help = 'Create a dataset')
+    create = actions.add_parser('create', help='Create a dataset')
     create.add_argument('--label_source', default='Olshevsky',
                         choices=['Olshevsky', 'Unlabeled'])
     create.add_argument('--start', default='2017-11-01',
-                        help ='Start date, format YYYY-MM-DD/HH:MM:DD')
+                        help='Start date, format YYYY-MM-DD/HH:MM:DD')
     create.add_argument('--end', default='2017-11-30',
-                        help ='End date, format YYYY-MM-DD/HH:MM:DD')
+                        help='End date, format YYYY-MM-DD/HH:MM:DD')
     create.add_argument('--force', action='store_true', default=False)
     create.add_argument('--clean', action='store_true', default=False)
     create.add_argument('--samples', default=0)
     create.add_argument('--resample', default=None)
     create.add_argument('--var',
-                        action = 'append',
+                        action='append',
                         choices=_VAR_TO_FILE_INFO.keys())
     create.add_argument('output')
 
@@ -51,9 +53,10 @@ def pars_args():
 
     print("Arguments:")
     for arg in vars(args):
-        print(f" {arg}: {getattr(args,arg)}")
+        print(f" {arg}: {getattr(args, arg)}")
 
     return args
+
 
 def main():
     """
@@ -62,6 +65,7 @@ def main():
     args = pars_args()
     if args.command == 'create':
         create_action(args)
+
 
 if __name__ == "__main__":
     main()

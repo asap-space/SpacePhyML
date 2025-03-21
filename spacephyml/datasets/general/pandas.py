@@ -5,8 +5,8 @@ Module containing different datasets.
 from torch.utils.data import Dataset
 
 import numpy as np
-import pandas as pd
 from ..utils import pandas_read_file
+
 
 class PandasDataset(Dataset):
     """
@@ -23,19 +23,18 @@ class PandasDataset(Dataset):
 
     Args:
         dataset_path (string): Path to the file containing the dataset.
-        transform (callable): Optional transform to be applied on each data sample.
+        transform (callable): Optional transform to be applied on each
+            data sample.
         data_columns (list): Which columns to use for data.
         label_column (string): Which column to use for label.
 
     Returns:
-        Will return a list with with all the data varibles in a list followed by the label.
-        If 'return_epoch = True' is set the the label epoch of the data will also be
-        returned.
-
+        Will return a list with with all the data varibles in a list followed
+        by the label.
     """
 
-    def __init__(self, dataset_path, transform = None, data_columns = None,
-                 label_column = None, return_index = True):
+    def __init__(self, dataset_path, transform=None, data_columns=None,
+                 label_column=None, return_index=True):
 
         self.dataset = pandas_read_file(dataset_path)
         self.label_column = label_column
@@ -43,9 +42,10 @@ class PandasDataset(Dataset):
 
         self.data_columns = data_columns
         if self.data_columns is None:
-            self.data_columns =[c
-                for c in self.dataset.columns
-                    if not c in [self.label_column, 'Unnamed: 0', 'label']]
+            self.data_columns = [c
+                                 for c in self.dataset.columns
+                                 if c not in [self.label_column,
+                                              'Unnamed: 0', 'label']]
 
         self.length = len(self.dataset.index)
 

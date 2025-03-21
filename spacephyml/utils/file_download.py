@@ -9,13 +9,15 @@ from tempfile import NamedTemporaryFile
 from tqdm.auto import tqdm
 import requests
 
-def missing_files(files,rootdir=''):
+
+def missing_files(files, rootdir=''):
     """
     Check for missing files.
 
     Args:
         files (list): The files (including path) to check.
-        rootdir (string) : A root path to add before the paths in the files list.
+        rootdir (string) :
+            A root path to add before the paths in the files list.
 
     Returns:
         A list of files (from the files argument) that does not exist.
@@ -31,7 +33,8 @@ def missing_files(files,rootdir=''):
 
     return missing
 
-def download_file_with_status(url_file, filepath, session = None):
+
+def download_file_with_status(url_file, filepath, session=None):
     """
     Download one file with a progress bar.
 
@@ -51,11 +54,12 @@ def download_file_with_status(url_file, filepath, session = None):
     # https://stackoverflow.com/questions/37573483/progress-bar-while-download-file-over-http-with-requests
     if r.status_code != 200:
         r.raise_for_status()  # Will only raise for 4xx codes, so...
-        raise RuntimeError(f"Request to {url_file} returned status code {r.status_code}")
+        raise RuntimeError("Request to {url_file} returned status code " +
+                           f"{r.status_code}")
     file_size = int(r.headers.get('Content-Length', 0))
 
     desc = "(Unknown total file size)" if file_size == 0 else ""
-    r.raw.read = functools.partial(r.raw.read, decode_content=True)  # Decompress if needed
+    r.raw.read = functools.partial(r.raw.read, decode_content=True)
     with NamedTemporaryFile() as ftmp:
         with tqdm.wrapattr(r.raw, "read", total=file_size, desc=desc) as r_raw:
             with open(ftmp.name, 'wb') as f:

@@ -3,26 +3,29 @@ import pytplot
 import pandas as pd
 import numpy as np
 
+
 class SpedasWrapper(Dataset):
     """
-    Wrapper for loading varibles from pyspedas (tplot) into a pytorch dataset. The loading
-    is a beast effort and might not work for some varibles and missions. The varibles are
-    assumed to already be loaded into tplot in the correct timerange.
+    Wrapper for loading varibles from pyspedas (tplot) into a pytorch dataset.
+    The loading is a beast effort and might not work for some varibles and
+    missions. The varibles are assumed to already be loaded into tplot in the
+    correct timerange.
 
     Args:
         tplot_vars (list of strings) :
             The varibles to load.
         dropna (bool) :
-            Drop times where one of the varibles have value NAN. May result in removal of all
-            data if tplot_vars are sampled at different times and resample is not set.
+            Drop times where one of the varibles have value NAN. May result in
+            removal of all data if tplot_vars are sampled at different times
+            and resample is not set.
         resample (string) :
-            Time interval for resampling, follows the pandas style for resample. No resampling
-            is done if set to None.
+            Time interval for resampling, follows the pandas style for
+            resample. No resampling is done if set to None.
         transform (callable)
             Transform to apply to each sample.
 
     """
-    def __init__(self, tplot_vars, dropna = True, resample = None, transform = None):
+    def __init__(self, tplot_vars, dropna=True, resample=None, transform=None):
         self.dataset = None
         self.features = []
         feature_cnt = 0
@@ -36,7 +39,7 @@ class SpedasWrapper(Dataset):
             elif len(data) == 3:
                 time, data, a = data
 
-            names = pytplot.get_data(var, metadata = True)['CDF']['LABELS']
+            names = pytplot.get_data(var, metadata=True)['CDF']['LABELS']
             if names is None:
                 names = ['']
             else:
@@ -56,15 +59,16 @@ class SpedasWrapper(Dataset):
             self.features.append((feature_cnt, feature_cnt+len(names)))
             feature_cnt += len(names)
             if data.ndim > 1:
-                tmp = pd.DataFrame({k: data[:,i] for i,k in enumerate(names)},
-                    index = pd.to_datetime(time, unit='s'))
+                tmp = pd.DataFrame({k: data[:, i]
+                                   for i, k in enumerate(names)},
+                                   index=pd.to_datetime(time, unit='s'))
             else:
                 tmp = pd.DataFrame({k: data[:] for k in names},
-                    index = pd.to_datetime(time, unit='s'))
+                                   index=pd.to_datetime(time, unit='s'))
             if self.dataset is None:
                 self.dataset = tmp
             else:
-                self.dataset = self.dataset.join(tmp, how = 'outer')
+                self.dataset = self.dataset.join(tmp, how='outer')
 
         self.resampled = False
         if resample:
@@ -81,7 +85,7 @@ class SpedasWrapper(Dataset):
     def __len__(self):
         return self.length
 
-    def __getitem__(self,idx):
+    def __getitem__(self, idx):
         if not isinstance(idx, int):
             raise ValueError('Expected idx to be an integer value')
         data = np.array([d for d in self.dataset.iloc[idx]])
