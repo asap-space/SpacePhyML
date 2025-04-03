@@ -4,7 +4,7 @@ Train a new PCReduced model using the PCNov2017 dataset.
 
 import torch
 from spacephyml.datasets.mms import MMS1IonDistLabeled
-from spacephyml.models.arcs import PCReduced
+from spacephyml.models.arcs import PCReduced_arc, PCBaseline_arc
 
 _VERBOSE = True
 _EPOCHS = 50

@@ -5,7 +5,7 @@ Module containing different datasets.
 from torch.utils.data import Dataset
 
 import numpy as np
-from ..utils import pandas_read_file
+from ...utils import pandas_read_file
 
 
 class PandasDataset(Dataset):
