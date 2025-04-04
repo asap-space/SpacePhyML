@@ -37,11 +37,11 @@ class MMS1IonDistLabeled(ExternalMMSData):
 
     _valid_datasets = ['SCNov2017', 'SCDec2017']
     _datasets = {'SCNov2017': {
-                    'url': '',
+                    'url': 'https://zenodo.org/records/15147451/files/dataset_nov_2017_clean.csv?download=1',
                     'file': 'dataset_nov_2017_clean.csv'
                 },
                 'SCDec2017': {
-                    'url': '',
+                    'url': 'https://zenodo.org/records/15147451/files/dataset_dec_2017_clean.csv?download=1',
                     'file': 'dataset_dec_2017_clean.csv'
                 }}
 

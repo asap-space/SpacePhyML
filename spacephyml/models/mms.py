@@ -17,18 +17,17 @@ class PCBaseline(PCBaseline_arc):
         model (string): The model to load, ['s42', 's84', 's168', 's336']
         path (string): Path to loacation of stored model.
     """
-
     _models = {'s42': {
-                    'url': '',
+                    'url': 'https://zenodo.org/records/15147451/files/model_PCBaseline_s42.pth?download=1',
                     'file': 'model_PCBaseline_s42.pth'},
                's84': {
-                    'url': '',
+                    'url': 'https://zenodo.org/records/15147451/files/model_PCBaseline_s84.pth?download=1',
                     'file': 'model_PCBaseline_s84.pth'},
                's168': {
-                    'url': '',
+                    'url': 'https://zenodo.org/records/15147451/files/model_PCBaseline_s168.pth?download=1',
                     'file': 'model_PCBaseline_s168.pth'},
                's336': {
-                    'url': '',
+                    'url': 'https://zenodo.org/records/15147451/files/model_PCBaseline_s336.pth?download=1',
                     'file': 'model_PCBaseline_s336.pth'},
                }
 
@@ -63,16 +62,16 @@ class PCReduced(PCReduced_arc):
     """
 
     _models = {'s42': {
-                    'url': '',
+                    'url': 'https://zenodo.org/records/15147451/files/model_PCReduced_s42.pth?download=1',
                     'file': 'model_PCReduced_s42.pth'},
                's84': {
-                    'url': '',
+                    'url': 'https://zenodo.org/records/15147451/files/model_PCReduced_s84.pth?download=1',
                     'file': 'model_PCReduced_s84.pth'},
                's168': {
-                    'url': '',
+                    'url': 'https://zenodo.org/records/15147451/files/model_PCReduced_s168.pth?download=1',
                     'file': 'model_PCReduced_s168.pth'},
                's336': {
-                    'url': '',
+                    'url': 'https://zenodo.org/records/15147451/files/model_PCReduced_s336.pth?download=1',
                     'file': 'model_PCReduced_s336.pth'},
                }
 
