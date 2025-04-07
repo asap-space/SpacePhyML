@@ -7,15 +7,15 @@ import pandas as pd
 import cdflib
 
 
-def read_cdf_file(cdf_filepath, variables = None):
+def read_cdf_file(cdf_filepath, variables=None):
     """
     Read a cdf file, either fully or only a subset.
 
-    Arguments:
+    Args:
         cdf_filepath (string): Path to the CDF file.
         variables (list): List with tuples the names to store
                     the varibles in and varibles to read.
-    Output:
+    Returns:
         Dictionary with the varibles.
     """
     if variables is None:
@@ -32,10 +32,17 @@ def read_cdf_file(cdf_filepath, variables = None):
 
     return data
 
+
 def pandas_read_file(filepath):
     """
-    Wrapper to handle reading data from multiple different fileformats.
+    Wrapper to handle reading data from multiple different file formats.
+
+    Args:
+        filepath (string): The file path including file extension.
+    Returns:
+        A pandas DataFrame read from the given file path.
     """
+
     _, fileformat = path.splitext(filepath)
     if fileformat == '.csv':
         return pd.read_csv(filepath)

@@ -1,138 +1,68 @@
 """
-Module containing different datasets.
+Specific MMS Datasets.
 """
 
-from torch.utils.data import Dataset
+from os import makedirs
 
 import numpy as np
 
-from ..utils import mms, read_cdf_file, pandas_read_file
-from ..utils.file_download import missing_files
-from ..__init__ import _MMS_DATA_DIR
+from .general.mms import ExternalMMSData
+from ..utils.file_download import missing_files, download_file_with_status
+from ..transforms import MMS1IonDistLabeled_Transform
 
-class ExternalMMSData(Dataset):
+
+class MMS1IonDistLabeled(ExternalMMSData):
     """
-    Loading a dataset with labeled MMS data based on dataset file.
-
-    This dataset class looks for datafiles stored in CDF files in another location.
-    By default SpacePhyML will look for external MMS data at the PySPEDAS data location
-    ([PySPEDAS](https://pyspedas.readthedocs.io/en/stable/getting_started.html#local-data-directories).)
-    If the PySPEDAS environmental variable's are not set data will be placed at
-    `$HOME/spacephyml_data/mms`, following the same directory structure as
-    PySPEDAS (and the [MMS Science Data Center](https://lasp.colorado.edu/mms/sdc/public/)).
-    Data files that are missing when the class is initialised will be downloaded.
-
-    The dataset file have to have the following columns:
-
-    - label : The label corresponding to the sample
-    - epoch : The CDF epoch for the label
-    - file {i} : Specifying the MMS CDF file to read data from, the {i} is a running number.
-    - var_name {i} : The variable in the CDF file to read, the {i} is a running number.
-    - epoch {i} : The CDF epoch to read data from the {i} is a running number.
-
-    Note:
-        If loading data fail it may be due to the cdf file being corrupt. Delete
-        the failing file and retry.
 
     Examples:
-        >>> from spacephyml.datasets import ExternalMMSData
-        >>> dataset = ExternalMMSData('./mydataset.csv')
+        >>> from spacephyml.datasets.mms import MMS1IonDistLabeled
+        >>> dataset = MMS1IonDistLabeled('SCDec017')
 
-    Args:
-        dataset_path (string): Path to the file containing the dataset.
-        rootdir (string): The override the default rootdir to for the MMS data storage.
-        transform (callable): Optional transform to be applied on each sample.
-        cache (bool): If data should be cached.
-        return_epoch (bool): If the label epoch should be returned.
-
-    Returns:
-        Will return a list with with all the data varibles in a list followed by the label.
-        If 'return_epoch = True' is set the the label epoch of the data will also be
-        returned.
-
+    [^1]: Olshevsky, V., et al. (2021). Automated classification of plasma regions using 3D particle energy distributions. Journal of Geophysical Research: Space Physics, https://doi.org/10.1029/2021JA029620
     """
 
-    def __init__(self, dataset_path, rootdir = None, transform = None, cache = True,
-                 return_epoch = True):
+    _valid_datasets = ['SCNov2017', 'SCDec2017']
+    _datasets = {'SCNov2017': {
+                    'url': 'https://zenodo.org/records/15147451/files/dataset_nov_2017_clean.csv?download=1',
+                    'file': 'dataset_nov_2017_clean.csv'
+                },
+                'SCDec2017': {
+                    'url': 'https://zenodo.org/records/15147451/files/dataset_dec_2017_clean.csv?download=1',
+                    'file': 'dataset_dec_2017_clean.csv'
+                }}
 
-        self.dataset = pandas_read_file(dataset_path)
-        self.cache = cache
-        self.return_epoch = return_epoch
+    def __init__(self, dataset, path='./datasets', data_root=None,
+                 transform=None, cache=True, return_epoch = False):
+        """
 
-        if rootdir:
-            self.rootdir = rootdir
-        else:
-            self.rootdir = _MMS_DATA_DIR
+        Args:
+            dataset (string):
+                The dataset, either SCNov2017 or SCDec2017.
+            path (string):
+                The path for storing the dataset (not the actuall data).
+            data_root (string):
+                The override the default root directory to for the MMS data
+                storage.
+            transform (callable):
+                Optional transform to be applied on each sample.
+            cache (bool):
+                If data should be cached.
+            return_epoch (bool):
+                If the label epoch should be returned.
+        """
+        if dataset not in self._valid_datasets:
+            raise ValueError(f'Incorrect dataset, {dataset} not in' +
+                             '{self._valid_datasets}')
 
-        # There are two extra columns and for each varible
-        # there are three columns
-        self.num_vars = int((len(self.dataset.columns)-2)/3)
+        filepath = f'{path}/' + self._datasets[dataset]['file']
 
-        for i in range(self.num_vars):
-            files = mms.filename_to_filepath(self.dataset[f'file {i}'].unique())
+        missing = missing_files([filepath], './')
+        if missing:
+            print('Missing dataset file, downloading')
+            makedirs(path, exist_ok=True)
+            download_file_with_status(self._datasets[dataset]['url'], filepath)
 
-            if not isinstance(files, list):
-                files = [files]
+        if transform is None:
+            transform = MMS1IonDistLabeled_Transform()
 
-            missing = missing_files(files, self.rootdir)
-
-            if missing:
-                print(f"{len(missing)} data files are missing, downloading")
-                mms.download_cdf_files(self.rootdir, missing)
-
-            if self.cache:
-                #Add an index for each entry
-                self.dataset[f'index {i}'] = -1
-
-        self.length = len(self.dataset.index)
-
-        self.transform = transform
-
-        self.data = {}
-
-    def __len__(self):
-        return self.length
-
-    def __getitem__(self, idx):
-        if not isinstance(idx, int):
-            raise ValueError('Expected idx to be an integer value')
-
-        data_loc = self.dataset.iloc[idx]
-
-        sample = []
-        for i in range(self.num_vars):
-            cdf_filepath = f'{self.rootdir}/'
-            cdf_filepath += f'{mms.filename_to_filepath(data_loc[f"file {i}"])}'
-
-            data = {}
-            if self.cache:
-                if not data_loc[f'file {i}'] in self.data:
-                     self.data[data_loc[f'file {i}']] = \
-                        read_cdf_file(cdf_filepath,
-                                      [('var',data_loc[f'var_name {i}']), ('epoch','epoch')])
-
-                # This index caching does not seem to work
-                index = data_loc[f'index {i}']
-                if index == -1:
-                    self.dataset.at[idx,f'index {i}'] =  \
-                        np.where(self.data[data_loc[f'file {i}']]['epoch'] == data_loc[f'epoch {i}'])[0]
-                    index = self.dataset.loc[idx,f'index {i}']
-
-                sample.append(self.data[data_loc[f'file {i}']]['var'][index])
-            else:
-                data = read_cdf_file(cdf_filepath,
-                                      [('var',data_loc[f'var_name {i}']), ('epoch','epoch')])
-
-                index = np.where(
-                        data['epoch'] == data_loc[f'epoch {i}'])
-                sample.append(self.data[data_loc[f'file {i}']]['var'][index])
-
-        sample.append(data_loc.label)
-
-        if self.return_epoch:
-            sample.append(data_loc.epoch)
-
-        if self.transform:
-            sample = self.transform(sample)
-
-        return sample
+        super().__init__(filepath, data_root, transform, cache, return_epoch)
