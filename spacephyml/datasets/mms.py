@@ -8,11 +8,21 @@ import numpy as np
 
 from .general.mms import ExternalMMSData
 from ..utils.file_download import missing_files, download_file_with_status
-from ..transforms import MMS1IonDistLabeled_Transform
+from ..transforms import IonDist_Transform
 
 
 class MMS1IonDistLabeled(ExternalMMSData):
     """
+    This dataset contains two versions samled from labels created by Olshevsky, et. al. (2021)[^1]. The data samples in this dataset have one of the following labels:
+
+    | Value  | Label |
+    | -- | ---------------- |
+    | 0 | Solar Wind (SW) |
+    | 1 | Ion foreshock (IF) |
+    | 2 | Magnetosheath (MSH) |
+    | 3 | Magnetosphere (MSP) |
+
+    There are 10,000 samples for each label, for a total of 40,000 samples in each version of the dataset.
 
     Examples:
         >>> from spacephyml.datasets.mms import MMS1IonDistLabeled
@@ -63,6 +73,6 @@ class MMS1IonDistLabeled(ExternalMMSData):
             download_file_with_status(self._datasets[dataset]['url'], filepath)
 
         if transform is None:
-            transform = MMS1IonDistLabeled_Transform()
+            transform = IonDist_Transform()
 
         super().__init__(filepath, data_root, transform, cache, return_epoch)

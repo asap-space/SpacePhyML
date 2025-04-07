@@ -52,13 +52,13 @@ def get_file_list(start_date, end_date, data_rate='fast', data_level='l2',
     [https://lasp.colorado.edu/mms/sdc/public/about/how-to/](https://lasp.colorado.edu/mms/sdc/public/about/how-to/)
 
     Args:
-        start_date (string) : The start date for files, format YYYY-MM-DD.
-        end_date (string) : The end date for files, format YYYY-MM-DD.
-        data_rate (string) : The data rate, fast, burst or srvy.
-        data_level (string) : The level of data post processing.
-        datatype (string) : The datatype (not always used).
-        instrument (string) : The instrument onboard mms.
-        sc_id (string) : The spacecraft id, mms1, mms2, mms3 or mms4.
+        start_date (string): The start date for files, format YYYY-MM-DD.
+        end_date (string): The end date for files, format YYYY-MM-DD.
+        data_rate (string): The data rate, fast, burst or srvy.
+        data_level (string): The level of data post processing.
+        datatype (string): The datatype (not always used).
+        instrument (string): The instrument onboard mms.
+        sc_id (string): The spacecraft id, mms1, mms2, mms3 or mms4.
 
     Returns:
         A list of files.
@@ -84,10 +84,10 @@ def download_cdf_files(rootdir, cdf_filepaths, session=None):
 
     Args:
         rootdir (string): Root directory for storing downloaded files.
-        cdf_filepaths (list) : The paths to store the files (including
+        cdf_filepaths (list): The paths to store the files (including
             filename). The filename have to be the same as the file to
             download.
-        session  : The request session to use, if one exists.
+        session (Object): The request session to use, if one exists.
     """
     close_session = False
     if session is None:

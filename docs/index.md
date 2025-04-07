@@ -6,6 +6,8 @@ Checkout the [Quick Start](quick_start.md) to get going.
 
 ## Automatics in Space Exploration (ASAP)
 
+<img src="assets/asap_brand_logo.png" alt="ASAP Logo"; style="float:right; margin:10px" width="300px">
+
 The ASAP project is dedicated to designing and developing advanced algorithms that leverage artificial intelligence to automate onboard operations for space missions. These algorithms are specifically tailored for implementation on onboard processors, enhancing the efficiency, autonomy, and reliability of space systems. By integrating AI techniques, the project aims to reduce manual intervention, optimize mission performance, and enable smarter decision-making in real-time operational scenarios.
 
 Futher information can be found on the ASAP Project website, and the latest updates are posted on the project LinkedIn page:</br>
