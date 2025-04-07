@@ -13,6 +13,16 @@ from ..transforms import MMS1IonDistLabeled_Transform
 
 class MMS1IonDistLabeled(ExternalMMSData):
     """
+    This dataset contains two versions samled from labels created by Olshevsky, et. al. (2021)[^1]. The data samples in this dataset have one of the following labels:
+
+    | Value  | Label |
+    | -- | ---------------- |
+    | 0 | Solar Wind (SW) |
+    | 1 | Ion foreshock (IF) |
+    | 2 | Magnetosheath (MSH) |
+    | 3 | Magnetosphere (MSP) |
+
+    There are 10,000 samples for each label, for a total of 40,000 samples in each version of the dataset.
 
     Examples:
         >>> from spacephyml.datasets.mms import MMS1IonDistLabeled

@@ -1,4 +1,5 @@
 site_name: SpacePhyML
+site_url: https://jonah-e.github.io/SpacePhyML/
 site_author: Jonah Ekelund
 site_description: SpacePhyML Documentation
 copyright: Copyright &copy; 2024 Jonah Ekelund
@@ -21,6 +22,7 @@ theme:
 
 markdown_extensions:
   - footnotes
+  - tables
 
 watch:
   - docs
