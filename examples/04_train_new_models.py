@@ -3,12 +3,13 @@ Train a new PCReduced model using the PCNov2017 dataset.
 """
 
 import torch
+from torch import nn, optim
 from torch.utils.data import DataLoader
 from spacephyml.datasets.mms import MMS1IonDistLabeled
 from spacephyml.models.arcs.mms import PCReduced_arc, PCBaseline_arc
 
 _VERBOSE = True
-_EPOCHS = 50
+_EPOCHS = 5
 _LEARNING_RATE = 1e-5
 _BATCH_SIZE = 32
 
@@ -31,7 +32,7 @@ def train_loop(dataloader, model, loss_fn, optimizer, batch_size, device):
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
 
-def train_model(model, dataset, device="cpu"):
+def train_model(model, dataset, batch_size = _BATCH_SIZE, device="cpu"):
 
     dataloader_train = DataLoader(dataset, batch_size = _BATCH_SIZE, shuffle=True)
 
@@ -70,5 +71,5 @@ def main(seed):
     torch.save(model.classifier.state_dict(), f"./model_PCBaseline_s{seed}.ptk")
 
 if __name__ == "__main__":
-    for seed in [42, 84, 168, 336]:
-        main(seed)
+    seed = 42
+    main(seed)

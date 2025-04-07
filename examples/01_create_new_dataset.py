@@ -2,7 +2,7 @@
 Creates a new dataset of MMS plasma distribution data
 using Olshevsky labels.
 """
-from spacephyml.creator import create_dataset
+from spacephyml.datasets.creator import create_dataset
 
 create_dataset('./mms_region.csv',
                trange=['2017-12-04/05:00:00','2017-12-04/15:00:00'],
