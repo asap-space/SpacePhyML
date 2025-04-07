@@ -20,9 +20,9 @@ spacephyml create my_dataset.csv
 ```
 
 ```
-from spacephyml.datasets import MMSDataset
+from spacephyml.datasets.general.mms import ExternalMMSData
 
-dataset = MMSDataset('my_dataset.csv')
+dataset = ExternalMMSData('my_dataset.csv')
 ```
 
 ## Automatics in Space Exploration (ASAP)
