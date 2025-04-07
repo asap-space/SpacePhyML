@@ -310,9 +310,23 @@ _VAR_TO_FILE_INFO = {
 
 
 def get_dataset(label_source, trange, resample=None, clean=True, samples=0,
-                **kwargs):
+                var_list=['mms1_dis_dist_fast']):
     """
     Get a dataset based on a given config.
+
+    Args:
+        label_source (string): The source for the labels, either Olshevsky or Unlabeled.
+        trange (List): List with the start and end times for the dataset. The times should
+            be strings and can have either the format YYYY-mm-DD or YYYY-mm-DD/HH:MM:SS
+        resample (string): The resample frequency, this varible follow the rules from the
+            [pandas resample function](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.resample.html).
+            Cannot be used with label_source set to Olshevsky.
+        clean (Bool): If unknown (-1) labels should be removed.
+        samples (Integer): The number of samples per label, set to 0 for all samples.
+        var_list (List): List of varibles to get from the CDF-files
+
+    Returns:
+        A pandas DataFrame with the created dataset.
     """
 
     for i, t in enumerate(trange):
@@ -327,10 +341,10 @@ def get_dataset(label_source, trange, resample=None, clean=True, samples=0,
         print('Generating a mms dataset based on labels from ')
         print(f'\t{_OLSHEVSKY_REF}')
         dataset = _get_olshevsky_label_list(trange, resample=resample,
-                                            **kwargs)
+                                            var_list=var_list)
 
     elif label_source == 'Unlabeled':
-        dataset = _get_unlabeled_dataset(trange, resample=resample, **kwargs)
+        dataset = _get_unlabeled_dataset(trange, resample=resample, var_list=var_list)
 
     else:
         raise ValueError(f'Incorrect label_source ({label_source})')
@@ -356,6 +370,13 @@ def create_dataset(dataset_path, trange,
                    force=False, **kwargs):
     """
     Create a dataset file based on given config.
+
+    Args:
+        dataset_path (string): Path to store dataset, end with either .csv or .feather.
+        trange (List): List with the start and end times for the dataset. The times should
+            be strings and can have either the format YYYY-mm-DD or YYYY-mm-DD/HH:MM:SS
+        force (Bool): Overwrite exisiting file if one exists.
+        **kwargs : Futher arguments, passed directy to get_dataset(..)
     """
 
     dataset_path = path.abspath(dataset_path)

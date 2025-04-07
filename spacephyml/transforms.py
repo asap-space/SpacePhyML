@@ -25,7 +25,7 @@ class Compose():
 
         return sample
 
-class MMS1IonDistLabeled_Transform(Compose):
+class IonDist_Transform(Compose):
     """
     The default transform used in MMS1IonDistLabeled.
 

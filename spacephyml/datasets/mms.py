@@ -8,7 +8,7 @@ import numpy as np
 
 from .general.mms import ExternalMMSData
 from ..utils.file_download import missing_files, download_file_with_status
-from ..transforms import MMS1IonDistLabeled_Transform
+from ..transforms import IonDist_Transform
 
 
 class MMS1IonDistLabeled(ExternalMMSData):
@@ -73,6 +73,6 @@ class MMS1IonDistLabeled(ExternalMMSData):
             download_file_with_status(self._datasets[dataset]['url'], filepath)
 
         if transform is None:
-            transform = MMS1IonDistLabeled_Transform()
+            transform = IonDist_Transform()
 
         super().__init__(filepath, data_root, transform, cache, return_epoch)
