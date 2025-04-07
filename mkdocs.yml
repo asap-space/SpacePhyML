@@ -50,4 +50,5 @@ plugins:
             show_symbol_type_heading: true
             show_symbol_type_toc: true
             separate_signature: true
-            filters: ["!^_", "^__init__$"]
+            filters: ["!^_"]
+            merge_init_into_class: true

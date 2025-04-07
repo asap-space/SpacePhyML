@@ -9,13 +9,6 @@ class PCBaseline(PCBaseline_arc):
     """
     Load a train PCBaseline model for MMS dayside plasma region clessification.
 
-    Examples:
-        >>> from spacephyml.models.mms import PCBaseline
-        >>> model = PCBaseline('s84')
-
-    Args:
-        model (string): The model to load, ['s42', 's84', 's168', 's336']
-        path (string): Path to loacation of stored model.
     """
     _models = {'s42': {
                     'url': 'https://zenodo.org/records/15147451/files/model_PCBaseline_s42.pth?download=1',
@@ -32,6 +25,15 @@ class PCBaseline(PCBaseline_arc):
                }
 
     def __init__(self, model='s42', path = './models'):
+        """
+        Examples:
+            >>> from spacephyml.models.mms import PCBaseline
+            >>> model = PCBaseline('s84')
+
+        Args:
+            model (string): The model to load, ['s42', 's84', 's168', 's336']
+            path (string): Path to loacation of stored model.
+        """
         super().__init__()
 
         if model not in self._models.keys():
@@ -52,13 +54,6 @@ class PCReduced(PCReduced_arc):
     """
     Load a train PCReduced model for MMS dayside plasma region clessification.
 
-    Examples:
-        >>> from spacephyml.models.mms import PCReduced
-        >>> model = PCReduced('s84')
-
-    Args:
-        model (string): The model to load, ['s42', 's84', 's168', 's336']
-        path (string): Path to loacation of stored model.
     """
 
     _models = {'s42': {
@@ -76,6 +71,15 @@ class PCReduced(PCReduced_arc):
                }
 
     def __init__(self, model='s42', path = './models'):
+        """
+        Examples:
+            >>> from spacephyml.models.mms import PCReduced
+            >>> model = PCReduced('s84')
+
+        Args:
+            model (string): The model to load, ['s42', 's84', 's168', 's336']
+            path (string): Path to loacation of stored model.
+        """
         super().__init__()
 
         if model not in self._models.keys():

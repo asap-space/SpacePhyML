@@ -6,9 +6,9 @@ import torch
 from torch.utils.data import DataLoader
 
 from spacephyml.datasets.mms import MMS1IonDistLabeled
-from spacephyml.models import PCReduced
+from spacephyml.models.mms import PCReduced
 
-dataset = MMS1IonDistLabeled('SCDec2017')
+dataset = MMS1IonDistLabeled('SCNov2017')
 model = PCReduced(seed='42')
 
 labels = {'human': [], 'classifier': []}

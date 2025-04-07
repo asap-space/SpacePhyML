@@ -13,26 +13,12 @@ from ..transforms import MMS1IonDistLabeled_Transform
 
 class MMS1IonDistLabeled(ExternalMMSData):
     """
+
     Examples:
-        >>> from spacephyml.datasets import ExternalMMSData
-        >>> dataset = ExternalMMSData('./mydataset.csv')
+        >>> from spacephyml.datasets.mms import MMS1IonDistLabeled
+        >>> dataset = MMS1IonDistLabeled('SCDec017')
 
-    Args:
-        dataset (string):
-            The dataset, either SCNov2017 or SCDec2017.
-        path (string):
-            The path for storing the dataset (not the actuall data).
-        data_root (string):
-            The override the default root directory to for the MMS data
-            storage.
-        transform (callable):
-            Optional transform to be applied on each sample.
-        cache (bool):
-            If data should be cached.
-        return_epoch (bool):
-            If the label epoch should be returned.
-
-
+    [^1]: Olshevsky, V., et al. (2021). Automated classification of plasma regions using 3D particle energy distributions. Journal of Geophysical Research: Space Physics, https://doi.org/10.1029/2021JA029620
     """
 
     _valid_datasets = ['SCNov2017', 'SCDec2017']
@@ -46,7 +32,24 @@ class MMS1IonDistLabeled(ExternalMMSData):
                 }}
 
     def __init__(self, dataset, path='./datasets', data_root=None,
-                 transform=None, cache=True):
+                 transform=None, cache=True, return_epoch = False):
+        """
+
+        Args:
+            dataset (string):
+                The dataset, either SCNov2017 or SCDec2017.
+            path (string):
+                The path for storing the dataset (not the actuall data).
+            data_root (string):
+                The override the default root directory to for the MMS data
+                storage.
+            transform (callable):
+                Optional transform to be applied on each sample.
+            cache (bool):
+                If data should be cached.
+            return_epoch (bool):
+                If the label epoch should be returned.
+        """
         if dataset not in self._valid_datasets:
             raise ValueError(f'Incorrect dataset, {dataset} not in' +
                              '{self._valid_datasets}')
@@ -62,4 +65,4 @@ class MMS1IonDistLabeled(ExternalMMSData):
         if transform is None:
             transform = MMS1IonDistLabeled_Transform()
 
-        super().__init__(filepath, data_root, transform, cache)
+        super().__init__(filepath, data_root, transform, cache, return_epoch)
